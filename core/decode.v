@@ -194,7 +194,8 @@ module decode(
 
     assign o_opb = dec_alubus |
                    dec_bjubus |
-                   dec_lsubus;
+                   dec_lsubus |
+                   {`CIRNO_DEC_OPB_SIZE{1'b0}};
 
     assign o_rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
                    rv32_jr;
