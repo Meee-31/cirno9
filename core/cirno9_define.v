@@ -34,3 +34,18 @@
 
 `define CIRNO_DEC_OPB_SIZE 10
 `define CIRNO_DEC_USELE     3
+//译码信息总线，由于同一条指令只会使用一个模块，
+    //因此三个模块共用一条总线。
+
+`define CIRNO_CAL_OPN1 32:0
+`define CIRNO_CAL_OPN2 65:33
+`define CIRNO_CAL_ADD 66
+`define CIRNO_CAL_SUB 67
+`define CIRNO_CAL_SLL 68
+`define CIRNO_CAL_SRL 69
+`define CIRNO_CAL_SRA 70
+`define CIRNO_CAL_XOR 71
+`define CIRNO_CAL_CMP 72
+
+`define CIRNO_CAL_OPB_SIZE 73
+//位于EXU内部的操作信息总线。

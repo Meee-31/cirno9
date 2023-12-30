@@ -1,7 +1,7 @@
 `include "cirno9_define.v"
 
 module exu(
-    output o_ex4rd_rdy,
+    output hs_ex4rd_rdy,
 
     input [`CIRNO_DEC_OPB_SIZE-1:0] i_opb,
     input [`CIRNO_DEC_USELE   -1:0] i_usele,
