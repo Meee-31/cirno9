@@ -7,9 +7,13 @@ module decode(
     output wire [`CIRNO_DEC_OPB_SIZE-1:0] o_opb,
     output wire [`CIRNO_DEC_USELE   -1:0] o_usele,
     
-    output wire [19:0] o_idx,
-    output wire [ 2:0] o_ren,
-    output wire [63:0] o_rs,
+    output wire        o_rs1_ren,
+    output wire        o_rs2_ren,
+    
+    output wire [ 4:0] o_rs1_idx,
+    output wire [ 4:0] o_rs2_idx,
+    output wire [ 4:0] o_rd_idx,
+    output wire [31:0] o_im,
 
     output wire        o_ilgl,
     output wire        o_val
@@ -188,30 +192,17 @@ module decode(
     
     assign o_usele[`CIRNO_DEC_SELE_LSU] = rv32_iload | rv32_stype ;
 
-    assign o_opb = dec_opb = dec_alubus |
-                             dec_bjubus |
-                             dec_lsubus;
+    assign o_opb = dec_alubus |
+                   dec_bjubus |
+                   dec_lsubus;
 
-    wire rs2_im  = rv32_itype | rv32_iload | rv32_lui;
-    wire rs2_pc  = rv32_btype | rv32_auipc | rv32_j    | rv32_jr;
-    wire rs3_im  = rv32_btype | rv32_stype | rv32_jr;
+    assign o_rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
+                   rv32_jr;
+    assign o_rs2_ren = rv32_rtype | rv32_stype | rv32_btype;                
 
-    wire [4:0] rs1_idx = rv32_rs1;
-
-    wire [4:0] rs2_idx = rv32_rs2;
-
-    wire [4:0] rs3_idx = 5'b0;
-
-    wire [4:0] rd_idx  = rv32_rd;
-                        
-    assign o_idx = {rd_idx, rs3_idx, rs2_idx, rs1_idx};
-
-    wire rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
-                   rv32_jr    ;
-    wire rs2_ren = rv32_rtype | rv32_stype | rv32_btype;
-    wire rs3_ren = 1'b0;
-
-    assign o_ren = {rs3_ren, rs2_ren, rs1_ren};
+    assign o_rs1_idx = rv32_rs1;
+    assign o_rs2_idx = rv32_rs2;
+    assign o_rd_idx  = rv32_rd;
 
     wire [31:0] rv_im = ({32{rv32_itype}} & rv32_iim) |
                         ({32{rv32_stype}} & rv32_sim) |
@@ -219,11 +210,7 @@ module decode(
                         ({32{rv32_lui  }} & rv32_uim) |
                         ({32{rv32_auipc}} & rv32_uim);
 
-    wire [31:0] rv_rs2 = ({32{rs2_im}} & rv_im) |
-                         ({32{rs2_pc}} & i_pc );
-    wire [31:0] rv_rs3 = ({32{rs3_im}} & rv_im);
-
-    assign o_rs = {rv_rs3,rv_rs2};//如此拼接为了在外部少定义一些信号
+    assign o_im = rv_im;
 
     wire rv32_all0s_ilgl = rv32_fun7_0000000           & 
                            rv32_rs2_x0                 &
@@ -245,8 +232,7 @@ module decode(
                                 (~rv32_sxxi_shamt_legl);
 
     assign o_ilgl = (rv_all0s1s_ilgl     ) |
-                    (rv32_sxxi_shamt_ilgl) |
-                    (rv16_lwsp_ilgl      );
+                    (rv32_sxxi_shamt_ilgl);
 
     wire rv32_nop = (rv32_itype | rv32_rtype  | 
                          rv32_itype | rv32_lui| 
