@@ -48,7 +48,7 @@ module decode(
                                ,1'b0};
     wire [31: 0] rv32_uim    = {i_in[31:12] 
                                 ,12'b0};
-    //J指令已经完成，不需要imm
+    wire [31: 0] rv32_jim    = 
 
     wire rv32_rtype = (rv32_opcode == 7'b0110011);
     wire rv32_itype = (rv32_opcode == 7'b0010011);
