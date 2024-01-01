@@ -18,6 +18,7 @@
 `define CIRNO_DEC_BJU_JAL   6
 `define CIRNO_DEC_BJU_JALR  7
 `define CIRNO_DEC_BJU_AUIP  8
+`define CIRNO_DEC_BJU_MSK   9
 
 `define CIRNO_DEC_LSU_LB    0
 `define CIRNO_DEC_LSU_LH    1
@@ -27,6 +28,7 @@
 `define CIRNO_DEC_LSU_SB    5
 `define CIRNO_DEC_LSU_SH    6
 `define CIRNO_DEC_LSU_SW    7
+`define CIRNO_DEC_LSU_MSK   9:8
 
 `define CIRNO_DEC_SELE_ALU  0
 `define CIRNO_DEC_SELE_LSU  1

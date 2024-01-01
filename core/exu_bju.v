@@ -40,7 +40,11 @@ module exu_bju(
                                                           | i_opb[`CIRNO_DEC_BJU_BGE]
                                                           | i_opb[`CIRNO_DEC_BJU_BLTU]
                                                           | i_opb[`CIRNO_DEC_BJU_BGEU]);
-    assign o_cal_opb[`CIRNO_CAL_ADD] = hs_ex4bj_val & (justb | auipc);
+    assign o_cal_opb[`CIRNO_CAL_ADD] = 1'b0;
+    assign o_cal_opb[`CIRNO_CAL_SUB] = 1'b0;
+    assign o_cal_opb[`CIRNO_CAL_SLL] = 1'b0;
+    assign o_cal_opb[`CIRNO_CAL_SRL] = 1'b0;
+    assign o_cal_opb[`CIRNO_CAL_SRA] = 1'b0;
 
     assign o_cal_opb[`CIRNO_CAL_OPN1] = {33{hs_ex4bj_val}} & cal_opn1;
     assign o_cal_opb[`CIRNO_CAL_OPN2] = {33{hs_ex4bj_val}} & cal_opn2;

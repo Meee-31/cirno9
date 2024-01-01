@@ -14,7 +14,7 @@ module ram32(
         for (i = 0; i<1023; i = i + 1) begin :DI
             always @(posedge clk) begin
                 if (en & we)
-                    if (adr == i) mem_r <= din;
+                    if (adr == i) mem_r <= din[adr[31:2]];
             end
         end
     endgenerate
