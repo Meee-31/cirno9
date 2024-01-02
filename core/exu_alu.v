@@ -25,8 +25,8 @@ module exu_alu(
 
     wire        and_op  = i_opb[`CIRNO_DEC_ALU_AND]; 
     wire        or_op   = i_opb[`CIRNO_DEC_ALU_OR];
-    wire [31:0] alu_res = {32{and_op}} & and_res
-                         |{32{or_op }} & or_res ;
+    wire [31:0] alu_res = ({32{and_op}} & and_res)
+                         |({32{or_op }} & or_res);
 
     wire [32:0] cal_opn1 = opn_u ? {1'b0, i_opn1}
                                  : {i_opn1[31], i_opn1};
@@ -49,6 +49,6 @@ module exu_alu(
     wire [31:0] or_res  = i_opn1 | i_opn2;
 //AND和OR指令在alu内进行计算。
     
-    assign o_res = {32{cal_op}} & i_cal_res
-                  |{32{alu_op}} & alu_res;
+    assign o_res = ({32{cal_op}} & i_cal_res)
+                  |({32{alu_op}} & alu_res);
 endmodule

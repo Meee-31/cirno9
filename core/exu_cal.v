@@ -55,9 +55,9 @@ module exu_cal(
     wire [32:0] xor_res = xoropn1 ^ xoropn2;
     wire [32:0] cmp_res = {32'b0, addsub_res[32]};
 
-    assign res = {32{(opadd|opsub)}} & addsub_res[31:0]
-               | {32{opsr         }} & sr_res[31:0]
-               | {32{opsl         }} & sl_res[31:0]
-               | {32{opxor        }} & xor_res[31:0]
-               | {32{opcmp        }} & cmp_res[31:0];
+    assign res = ({32{(opadd|opsub)}} & addsub_res[31:0])
+               | ({32{opsr         }} & sr_res[31:0]    )
+               | ({32{opsl         }} & sl_res[31:0]    )
+               | ({32{opxor        }} & xor_res[31:0]   )
+               | ({32{opcmp        }} & cmp_res[31:0]   );
 endmodule

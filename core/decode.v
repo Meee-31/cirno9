@@ -9,6 +9,7 @@ module decode(
     
     output wire        o_rs1_ren,
     output wire        o_rs2_ren,
+    output wire        o_rd_wen,
     
     output wire [ 4:0] o_rs1_idx,
     output wire [ 4:0] o_rs2_idx,
@@ -48,7 +49,12 @@ module decode(
                                ,1'b0};
     wire [31: 0] rv32_uim    = {i_in[31:12] 
                                 ,12'b0};
-    wire [31: 0] rv32_jim    = 
+    wire [31: 0] rv32_jim    = {{11{i_in[31]}} 
+                             , i_in[31] 
+                             , i_in[19:12] 
+                             , i_in[20] 
+                             , i_in[30:21]
+                             , 1'b0};
 
     wire rv32_rtype = (rv32_opcode == 7'b0110011);
     wire rv32_itype = (rv32_opcode == 7'b0010011);
@@ -198,8 +204,10 @@ module decode(
                    {`CIRNO_DEC_OPB_SIZE{1'b0}};
 
     assign o_rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
-                   rv32_jr;
-    assign o_rs2_ren = rv32_rtype | rv32_stype | rv32_btype;                
+                       rv32_jr;
+    assign o_rs2_ren = rv32_rtype | rv32_stype | rv32_btype;
+    assign o_rd_wen  = rv32_rtype | rv32_itype | rv32_iload | rv32_j     |
+                       rv32_jr    | rv32_lui   | rv32_auipc;
 
     assign o_rs1_idx = rv32_rs1;
     assign o_rs2_idx = rv32_rs2;
@@ -209,7 +217,9 @@ module decode(
                         ({32{rv32_stype}} & rv32_sim) |
                         ({32{rv32_btype}} & rv32_bim) |
                         ({32{rv32_lui  }} & rv32_uim) |
-                        ({32{rv32_auipc}} & rv32_uim);
+                        ({32{rv32_auipc}} & rv32_uim) |
+                        ({32{rv32_j    }} & rv32_jim) |
+                        ({32{rv32_jr   }} & rv32_jim);;
 
     assign o_im = rv_im;
 

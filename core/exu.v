@@ -3,25 +3,23 @@
 module exu(
     output hs_ex4rd_rdy,
 
+    input              i_val,
+    input              i_deilg,
     input [`CIRNO_DEC_OPB_SIZE-1:0] i_opb,
     input [`CIRNO_DEC_USELE   -1:0] i_usele,
 
-    input i_rs1_ren,
     input i_rs2_ren,
 
     input       [31:0] i_rs1,
     input       [31:0] i_rs2,
     input       [31:0] i_im,
     input       [31:0] i_pc,
-    input       [ 4:0] i_rd_idx,
 
-    input              i_val,
-    input              i_deilg,
-
-    output wire        o_rd_wen,
     output wire [31:0] o_rd,
+
     output wire        o_setpc,
-    output wire [31:0] o_newpc,
+    output wire [31:0] o_pc,
+    output wire [31:0] o_pcadd,
 
     output wire        hs_ex4ls_val,
     input  wire        hs_ls4ex_rdy,
@@ -29,8 +27,31 @@ module exu(
     output wire [31:0] o_ls_wdat,
     output wire [ 3:0] o_ls_wen,
     input       [31:0] i_ls_rdat,
-    output wire        o_ls_ren
+    output wire        o_ls_ren,
+    output wire        o_ilg
 );
+    assign hs_ex4rd_rdy = (hs_al4ex_rdy & i_usele[`CIRNO_DEC_SELE_ALU])
+                        | (hs_bj4ex_rdy & i_usele[`CIRNO_DEC_SELE_BJU])
+                        | (hs_ag4ex_rdy & i_usele[`CIRNO_DEC_SELE_AGU]);
+
+    assign o_rd = (alex_res & {32{i_usele[`CIRNO_DEC_SELE_ALU]}})
+                | (bjex_res & {32{i_usele[`CIRNO_DEC_SELE_BJU]}})
+                | (agex_res & {32{i_usele[`CIRNO_DEC_SELE_AGU]}});
+
+    assign o_setpc = bjex_pc_setpc;
+    assign o_pc = bjex_pc_pc;
+    assign o_pcadd = bjex_pc_pcadd;
+
+    assign hs_ex4ls_val = hs_ag4ls_val;
+    assign hs_ls4ag_rdy = hs_ls4ex_rdy;
+    assign o_ls_adr = agex_ls_adr;
+    assign o_ls_wdat = agex_ls_wdat;
+    assign o_ls_wen = agex_ls_wen;
+    assign exag_ls_rdat = i_ls_rdat;
+    assign o_ls_ren = agex_ls_ren;
+
+    assign o_ilg = agex_misal | i_deilg;
+
     wire  hs_ex4cal_val = hs_ag4cal_val | hs_bj4cal_val | hs_al4cal_val;
     wire  hs_cal4ex_rdy;
     wire  [`CIRNO_CAL_OPB_SIZE-1:0]  cal_opb = agcal_cal_opb | bjcal_cal_opb | alcal_cal_opb;
