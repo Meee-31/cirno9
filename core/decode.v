@@ -190,7 +190,7 @@ module decode(
                                    
     assign o_usele[`CIRNO_DEC_SELE_BJU] = rv32_btype | rv32_j     | rv32_jr ;
     
-    assign o_usele[`CIRNO_DEC_SELE_LSU] = rv32_iload | rv32_stype ;
+    assign o_usele[`CIRNO_DEC_SELE_AGU] = rv32_iload | rv32_stype ;
 
     assign o_opb = dec_alubus |
                    dec_bjubus |

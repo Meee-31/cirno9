@@ -31,7 +31,7 @@
 `define CIRNO_DEC_LSU_MSK   9:8
 
 `define CIRNO_DEC_SELE_ALU  0
-`define CIRNO_DEC_SELE_LSU  1
+`define CIRNO_DEC_SELE_AGU  1
 `define CIRNO_DEC_SELE_BJU  2
 
 `define CIRNO_DEC_OPB_SIZE 10
