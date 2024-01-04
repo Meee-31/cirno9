@@ -20,8 +20,8 @@ module exu_agu(
     input  wire        hs_ls4ag_rdy,
     output wire [31:0] o_ls_adr,
     output wire [31:0] o_ls_wdat,
-    output wire [ 3:0] o_ls_wen,
     input       [31:0] i_ls_rdat,
+    output wire [ 3:0] o_ls_wen,
     output wire        o_ls_ren,
     
     output wire        o_misal
