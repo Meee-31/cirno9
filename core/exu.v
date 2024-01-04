@@ -3,8 +3,8 @@
 module exu(
     output hs_ex4rd_rdy,
 
-    input              i_val,
-    input              i_deilg,
+    input i_val,
+    input i_deilg,
     input [`CIRNO_DEC_OPB_SIZE-1:0] i_opb,
     input [`CIRNO_DEC_USELE   -1:0] i_usele,
 
@@ -25,8 +25,8 @@ module exu(
     input  wire        hs_ls4ex_rdy,
     output wire [31:0] o_ls_adr,
     output wire [31:0] o_ls_wdat,
-    output wire [ 3:0] o_ls_wen,
     input       [31:0] i_ls_rdat,
+    output wire [ 3:0] o_ls_wen,
     output wire        o_ls_ren,
     output wire        o_ilg
 );
@@ -52,10 +52,10 @@ module exu(
 
     assign o_ilg = agex_misal | i_deilg;
 
-    wire  hs_ex4cal_val = hs_ag4cal_val | hs_bj4cal_val | hs_al4cal_val;
-    wire  hs_cal4ex_rdy;
-    wire  [`CIRNO_CAL_OPB_SIZE-1:0]  cal_opb = agcal_cal_opb | bjcal_cal_opb | alcal_cal_opb;
-    wire  [31:0]  cal_res;
+    wire hs_ex4cal_val = hs_ag4cal_val | hs_bj4cal_val | hs_al4cal_val;
+    wire hs_cal4ex_rdy;
+    wire [`CIRNO_CAL_OPB_SIZE-1:0]  cal_opb = agcal_cal_opb | bjcal_cal_opb | alcal_cal_opb;
+    wire [31:0]  cal_res;
     
     exu_cal  u_exu_cal (
         .hs_ex4cal_val           ( hs_ex4cal_val   ),
@@ -64,12 +64,12 @@ module exu(
         .res                     ( cal_res         )
     );
   
-    wire      hs_ex4al_val = i_usele[`CIRNO_DEC_SELE_ALU] & i_val;
-    wire      hs_al4ex_rdy;
-    wire  [31:0]  exal_opn2 = i_rs2_ren ? i_rs2 : i_im;
-    wire  [31:0]  alex_res;
-    wire      hs_al4cal_val;
-    wire  [`CIRNO_CAL_OPB_SIZE-1:0]  alcal_cal_opb;
+    wire        hs_ex4al_val = i_usele[`CIRNO_DEC_SELE_ALU] & i_val;
+    wire        hs_al4ex_rdy;
+    wire [31:0] exal_opn2 = i_rs2_ren ? i_rs2 : i_im;
+    wire [31:0] alex_res;
+    wire        hs_al4cal_val;
+    wire [`CIRNO_CAL_OPB_SIZE-1:0]  alcal_cal_opb;
     
     exu_alu  u_exu_alu (
         .hs_ex4al_val            ( hs_ex4al_val    ),
@@ -84,14 +84,14 @@ module exu(
         .i_cal_res               ( cal_res         )
     );
 
-    wire      hs_ex4bj_val = i_usele[`CIRNO_DEC_SELE_BJU] & i_val;
-    wire      hs_bj4ex_rdy;
-    wire  [31:0]  bjex_res;
-    wire          bjex_pc_setpc;
-    wire  [31:0]  bjex_pc_pc;
-    wire  [31:0]  bjex_pc_pcadd;
-    wire      hs_bj4cal_val;
-    wire  [`CIRNO_CAL_OPB_SIZE-1:0]  bjcal_cal_opb;
+    wire        hs_ex4bj_val = i_usele[`CIRNO_DEC_SELE_BJU] & i_val;
+    wire        hs_bj4ex_rdy;
+    wire [31:0] bjex_res;
+    wire        bjex_pc_setpc;
+    wire [31:0] bjex_pc_pc;
+    wire [31:0] bjex_pc_pcadd;
+    wire        hs_bj4cal_val;
+    wire [`CIRNO_CAL_OPB_SIZE-1:0]  bjcal_cal_opb;
     exu_bju  u_exu_bju (
         .hs_ex4bj_val            ( hs_ex4bj_val    ),
         .hs_bj4ex_rdy            ( hs_bj4ex_rdy    ),
@@ -110,19 +110,19 @@ module exu(
         .i_cal_res               ( cal_res         )
     );
         
-    wire          hs_ex4ag_val = i_usele[`CIRNO_DEC_SELE_AGU] & i_val;
-    wire          hs_ag4ex_rdy;
-    wire  [31:0]  agex_res;
-    wire          hs_ag4cal_val;
-    wire  [`CIRNO_CAL_OPB_SIZE-1:0]  agcal_cal_opb;
-    wire          hs_ag4ls_val;
-    wire          hs_ls4ag_rdy;
-    wire  [31:0]  agex_ls_adr;
-    wire  [31:0]  agex_ls_wdat;
-    wire  [ 3:0]  agex_ls_wen;
-    wire  [31:0]  exag_ls_rdat;
-    wire          agex_ls_ren;
-    wire          agex_misal;
+    wire        hs_ex4ag_val = i_usele[`CIRNO_DEC_SELE_AGU] & i_val;
+    wire        hs_ag4ex_rdy;
+    wire [31:0] agex_res;
+    wire        hs_ag4cal_val;
+    wire [`CIRNO_CAL_OPB_SIZE-1:0]  agcal_cal_opb;
+    wire        hs_ag4ls_val;
+    wire        hs_ls4ag_rdy;
+    wire [31:0] agex_ls_adr;
+    wire [31:0] agex_ls_wdat;
+    wire [ 3:0] agex_ls_wen;
+    wire [31:0] exag_ls_rdat;
+    wire        agex_ls_ren;
+    wire        agex_misal;
     
     exu_agu  u_exu_agu (
         .hs_ex4ag_val            ( hs_ex4ag_val    ),

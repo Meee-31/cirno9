@@ -2,14 +2,14 @@
 
 module regfile(
 
-  input       [31:0] read_src1_idx,
-  input       [31:0] read_src2_idx,
+  input       [ 4:0] read_src1_idx,
+  input       [ 4:0] read_src2_idx,
   output wire [31:0] read_src1_dat,
   output wire [31:0] read_src2_dat,
 
   input  wbck_dest_wen,
 
-  input  [31:0] wbck_dest_idx,
+  input  [ 4:0] wbck_dest_idx,
   input  [31:0] wbck_dest_dat,
 
   input  clk,
