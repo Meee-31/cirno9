@@ -32,7 +32,8 @@ module exu(
 );
     assign hs_ex4rd_rdy = (hs_al4ex_rdy & i_usele[`CIRNO_DEC_SELE_ALU])
                         | (hs_bj4ex_rdy & i_usele[`CIRNO_DEC_SELE_BJU])
-                        | (hs_ag4ex_rdy & i_usele[`CIRNO_DEC_SELE_AGU]);
+                        | (hs_ag4ex_rdy & i_usele[`CIRNO_DEC_SELE_AGU])
+                        | ~i_val;
 
     assign o_rd = (alex_res & {32{i_usele[`CIRNO_DEC_SELE_ALU]}})
                 | (bjex_res & {32{i_usele[`CIRNO_DEC_SELE_BJU]}})

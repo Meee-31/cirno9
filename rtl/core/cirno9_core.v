@@ -98,7 +98,7 @@ exu  u_exu (
     .i_rs1                   ( rs1          ),
     .i_rs2                   ( rs2          ),
     .i_im                    ( im           ),
-    .i_pc                    ( pc           ),
+    .i_pc                    ( pc_r           ),
     .o_rd                    ( rd           ),
     .o_setpc                 ( setpc        ),
     .o_pc                    ( pc           ),
