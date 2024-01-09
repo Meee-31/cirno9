@@ -8,7 +8,7 @@ module sram32(
 );
     reg  [31:0] mem_r [0:16383];
     wire [31:0] mem_d;
-    wire [31:0] adr_w = adr >> 2;
+    wire [13:0] adr_w = adr[15:2];
 
     always @(posedge clk) begin
         if (en & we[0]) mem_r[adr_w][ 7: 0] <= din[ 7: 0];

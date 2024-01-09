@@ -206,7 +206,7 @@ module decode(
     assign o_rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
                        rv32_jr;
     assign o_rs2_ren = rv32_rtype | rv32_stype | rv32_btype;
-    assign o_rd_wen  = rv32_rtype | rv32_itype | rv32_iload | rv32_j     |
+    assign o_rd_wen  = rv32_rtype | rv32_itype | rv32_iload |
                        rv32_jr    | rv32_lui   | rv32_auipc;
 
     assign o_rs1_idx = rv32_rs1;
@@ -219,7 +219,7 @@ module decode(
                         ({32{rv32_lui  }} & rv32_uim) |
                         ({32{rv32_auipc}} & rv32_uim) |
                         ({32{rv32_j    }} & rv32_jim) |
-                        ({32{rv32_jr   }} & rv32_jim);;
+                        ({32{rv32_jr   }} & rv32_jim);
 
     assign o_im = rv_im;
 

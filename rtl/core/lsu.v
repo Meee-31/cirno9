@@ -16,6 +16,7 @@ module lsu(
     output [31:0] o_wdat,
 
     input         hs_rd4ls_val,
+    output        hs_ls4rd_rdy,
     input  [31:0] i_pc,
 
     input         hs_ag4ls_val,
@@ -36,15 +37,14 @@ module lsu(
 );
     wire sel_sram = (ls_adr[31:16] == 16'h8000);
     wire out_rdy = sel_sram ? hs_ram4ls_rdy : hs_axim4ls_rdy;
-    wire hs_ls4rd_rdy;
 
-    assign hs_ls4rd_rdy = out_rdy & (~hs_axis4ls_val);
-    assign hs_ls4ag_rdy = out_rdy & (~hs_axis4ls_val) & (~hs_rd4ls_val);
-    assign hs_ls4axis_rdy = 1'b1;
+    assign hs_ls4axis_rdy = out_rdy & hs_axis4ls_val;
+    assign hs_ls4ag_rdy   = out_rdy & (~hs_axis4ls_val) & hs_ag4ls_val;
+    assign hs_ls4rd_rdy   = out_rdy & (~hs_axis4ls_val) & (~hs_ag4ls_val) & hs_rd4ls_val;
 
     wire [31:0] ls_adr  = hs_axis4ls_val ? i_axis_adr
-                        : hs_rd4ls_val   ? i_pc
-                        :                  i_ag_adr;
+                        : hs_ag4ls_val   ? i_ag_adr
+                        :                  i_pc;
     assign o_wdat = hs_ls4rd_rdy ? 32'b0
                   : hs_ls4ag_rdy ? i_ag_wdat
                   :                i_axis_wdat;

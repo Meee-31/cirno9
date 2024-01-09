@@ -1,4 +1,4 @@
-`include "./rtl/cirno9_cpu_top.v"
+`include "cirno9_cpu_top.v"
 
 module tb_top();
   
@@ -9,14 +9,14 @@ module tb_top();
   
     `define CORE    cpu0.u_cirno9_core
     `define REG     `CORE.u_regfile
-    `define SRAM    `CORE.u_sram32
+    `define SRAM    cpu0.u_sram32.mem_r
   
     wire [31:0] x3 = `REG.rf_r[3];
     wire [31:0] pc = `CORE.pc_r;
   
     reg [31:0] cycle_count;
   
-    always @(posedge hfclk or negedge rst_n)
+    always @(posedge clk or negedge rst_n)
     begin 
       if(rst_n == 1'b0) begin
           cycle_count <= 32'b0;
@@ -27,27 +27,34 @@ module tb_top();
     end
 
     initial begin
-        #10000
+        clk   <=0;
+        rst_n <=0;
+        #120 rst_n <=1;
+        #100000
             $display("Time Out !!!");
          $finish;
     end
 
-    reg [7:0] sram_mem [0:16383];
+    reg [7:0] sram_mem [0:65535];
     integer i;
     initial begin
-        $readmemh({testcase, ".verilog"}, sram_mem);
+        $readmemh({"rv32ui-p-add.verilog"}, sram_mem);
         
         for (i=0; i<16383;i=i+1) begin
-            `SRAM.mem_r[i][00+7:00] = sram_mem[i*4+0];
-            `SRAM.mem_r[i][08+7:08] = sram_mem[i*4+1];
-            `SRAM.mem_r[i][16+7:16] = sram_mem[i*4+2];
-            `SRAM.mem_r[i][24+7:24] = sram_mem[i*4+3];
+            `SRAM[i][00+7:00] = sram_mem[i*4+0];
+            `SRAM[i][08+7:08] = sram_mem[i*4+1];
+            `SRAM[i][16+7:16] = sram_mem[i*4+2];
+            `SRAM[i][24+7:24] = sram_mem[i*4+3];
         end
-        $display("RAM 0x00: %h", `SRAM.mem_r[00]);
-        $display("RAM 0x01: %h", `SRAM.mem_r[01]);
-        $display("RAM 0x02: %h", `SRAM.mem_r[02]);
-        $display("RAM 0x03: %h", `SRAM.mem_r[03]);
-        $display("RAM 0x10: %h", `SRAM.mem_r[10]);
+        $display("RAM 0x00: %h", `SRAM[00]);
+        $display("RAM 0x01: %h", `SRAM[01]);
+        $display("RAM 0x02: %h", `SRAM[02]);
+        $display("RAM 0x03: %h", `SRAM[03]);
+        $display("RAM 0x10: %h", `SRAM[10]);
+    end
+    always
+    begin 
+       #20 clk <= ~clk;
     end
 
     cirno9_cpu_top cpu0(

@@ -4,7 +4,7 @@ module cirno9_core(
     input         rst_n,
     input         clk,
 
-    output        o_hs_ram4ls_rdy,
+    input         i_hs_ram4ls_rdy,
     output        o_sram_ren,
     output [ 3:0] o_sram_wen,
     input  [31:0] i_sram_rdat,
@@ -25,12 +25,14 @@ pc  u_pc (
 );
 
 wire        hs_rd4ls_val;
+wire        hs_ls4rd_rdy;
 wire [31:0] valin;
 rd  u_rd (
     .clk                     ( clk         ),
     .rst_n                   ( rst_n       ),
     .rdy                     ( hs_ex4rd_rdy),
     .hs_rd4ls_val            ( hs_rd4ls_val),
+    .hs_ls4rd_rdy            ( hs_ls4rd_rdy),
     .i_pc_nx                 ( pc_nx       ),
     .o_pc_r                  ( pc_r        ),
     .i_in_r                  ( rdat        ),
@@ -89,6 +91,8 @@ wire        agls_ren;
 wire        ilg;
 
 exu  u_exu (
+    .clk                     ( clk          ),
+    .rst_n                   ( rst_n           ),
     .hs_ex4rd_rdy            ( hs_ex4rd_rdy ),
     .i_val                   ( deval        ),
     .i_deilg                 ( deilg        ),
@@ -120,10 +124,6 @@ wire        axim_ren;
 wire [31:0] o_axim_adr;
 wire [31:0] o_axim_wdat;
 wire [31:0] i_axim_rdat;
-wire [31:0] agls_adr;
-wire [31:0] agls_wdat;
-wire [ 3:0] agls_wen;
-wire        agls_ren;
 wire        hs_axis4ls_val;
 wire        hs_ls4axis_rdy;
 wire [31:0] axis_adr;
@@ -132,18 +132,19 @@ wire [ 3:0] axis_wen;
 wire        axis_ren;
 wire [31:0] rdat;
 lsu  u_lsu (
-    .hs_ram4ls_rdy           ( o_hs_ram4ls_rdy  ),
+    .hs_ram4ls_rdy           ( i_hs_ram4ls_rdy  ),
     .o_sram_ren              ( o_sram_ren       ),
     .o_sram_wen              ( o_sram_wen       ),
     .i_sram_rdat             ( i_sram_rdat      ),
     .hs_ls4axim_val          (   ),
-    .hs_axim4ls_rdy          ( 0  ),
+    .hs_axim4ls_rdy          ( 1'b0  ),
     .o_axim_wen              (   ),
     .o_axim_ren              (   ),
-    .i_axim_rdat             ( 0  ),
+    .i_axim_rdat             ( 32'b0  ),
     .o_adr                   ( o_adr            ),
     .o_wdat                  ( o_wdat           ),
     .hs_rd4ls_val            ( hs_rd4ls_val     ),
+    .hs_ls4rd_rdy            ( hs_ls4rd_rdy     ),
     .i_pc                    ( pc_r             ),
     .hs_ag4ls_val            ( hs_ex4ls_val     ),
     .hs_ls4ag_rdy            ( hs_ls4ex_rdy     ),
@@ -151,12 +152,12 @@ lsu  u_lsu (
     .i_ag_wdat               ( agls_wdat        ),
     .i_ag_wen                ( agls_wen         ),
     .i_ag_ren                ( agls_ren         ),
-    .hs_axis4ls_val          ( 0  ),
+    .hs_axis4ls_val          ( 1'b0  ),
     .hs_ls4axis_rdy          (   ),
-    .i_axis_adr              ( 0  ),
-    .i_axis_wdat             ( 0  ),
-    .i_axis_wen              ( 0  ),
-    .i_axis_ren              ( 0  ),
+    .i_axis_adr              ( 32'b0  ),
+    .i_axis_wdat             ( 32'b0  ),
+    .i_axis_wen              ( 4'b0  ),
+    .i_axis_ren              ( 1'b0  ),
     .o_rdat                  ( rdat             )
 );
 endmodule

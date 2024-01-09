@@ -21,6 +21,7 @@ module exu_bju(
     input       [31:0] i_cal_res
 );
     assign hs_bj4cal_val = hs_cal4bj_rdy;
+    assign hs_bj4ex_rdy  = hs_cal4bj_rdy;
     
     wire opn_u = i_opb[`CIRNO_DEC_BJU_BLTU]
                 |i_opb[`CIRNO_DEC_BJU_BGEU];

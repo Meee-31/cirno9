@@ -1,6 +1,8 @@
 `include "cirno9_define.v"
-
 module exu_agu(
+    input              clk,
+    input              rst_n,
+
     input              hs_ex4ag_val,
     output wire        hs_ag4ex_rdy,
 
@@ -59,7 +61,7 @@ module exu_agu(
                | ((lslw | lssw) & (| i_cal_res[1:0]));
     assign o_misal = misal & hs_ex4ag_val;
 
-    assign o_ls_adr = i_cal_res;
+    wire [31:0] o_ls_adr_r = i_cal_res;
     assign o_ls_ren = lslb | lslh | lslw;
 
     wire [3:0] swen = 4'b1111;
@@ -73,5 +75,8 @@ module exu_agu(
     assign o_ls_wdat = i_opn2;
     assign o_res = i_ls_rdat;
 
-    assign hs_ag4ls_val = hs_ex4ag_val & ~misal;
+    wire hs_ag4ls_val_r = hs_ex4ag_val & ~misal;
+
+    dffr #(1) val(hs_ag4ls_val_r, hs_ag4ls_val, clk, rst_n);
+    dffr #(32)adr(o_ls_adr_r, o_ls_adr, clk, rst_n);
 endmodule

@@ -1,6 +1,8 @@
 `include "cirno9_define.v"
 
 module exu(
+    input  clk,
+    input  rst_n,
     output hs_ex4rd_rdy,
 
     input i_val,
@@ -126,6 +128,8 @@ module exu(
     wire        agex_misal;
     
     exu_agu  u_exu_agu (
+        .clk                     ( clk             ),
+        .rst_n                   ( rst_n           ),
         .hs_ex4ag_val            ( hs_ex4ag_val    ),
         .hs_ag4ex_rdy            ( hs_ag4ex_rdy    ),
         .i_opb                   ( i_opb           ),
