@@ -1,4 +1,4 @@
-module csr(
+module exu_csr(
     input         rst_n,
     input         clk,
 
@@ -8,13 +8,16 @@ module csr(
     input  [31:0] csr_wdat,
     output [31:0] csr_rdat,
 
-    input        mret_ena,
-    input        trap_ena,
+    input         mret_ena,
+    input         trap_ena,
+    input         epc_en,
+    input  [31:0] epc_pc,
 
-    input        ext_ip,
-    input        tmr_ip,
-    input        sft_ip
+    input         ext_ip,
+    input         tmr_ip,
+    input         sft_ip,
 
+    input         in_retr
 );
     wire sel_misa = (csr_idx == 12'h301);
     wire rd_misa = sel_misa & csr_ren;
@@ -56,6 +59,8 @@ module csr(
     wire [31:0] cmimpid    = 32'hc109;
     wire rd_mhartid   = csr_ren & (csr_idx == 12'hF14);
     wire [31:0] cmhartid   = 32'b0;
+    wire rd_mconfigptr = csr_ren & (csr_idx == 12'hF15);
+    wire [31:0] cmconfigptr = 32'b0;
 
     wire sel_mstatus = (csr_idx == 12'h300);
     wire rd_mstatus = sel_mstatus & csr_ren; 
@@ -179,5 +184,87 @@ module csr(
     assign mie_r[2:0] = 3'b0;
     wire [31:0] cmie = mie_r;
     
-    
+    wire sel_mcyclel   = (csr_idx == 12'hB00);
+    wire sel_mcycleh   = (csr_idx == 12'hB80);
+    wire sel_minstretl = (csr_idx == 12'hB02);
+    wire sel_minstreth = (csr_idx == 12'hB82);
+    wire rd_mcyclel    = csr_ren & sel_mcyclel  ;
+    wire rd_mcycleh    = csr_ren & sel_mcycleh  ;
+    wire rd_minstretl  = csr_ren & sel_minstretl;
+    wire rd_minstreth  = csr_ren & sel_minstreth;
+    wire wr_mcyclel    = csr_wen & sel_mcyclel  ;
+    wire wr_mcycleh    = csr_wen & sel_mcycleh  ;
+    wire wr_minstretl  = csr_wen & sel_minstretl;
+    wire wr_minstreth  = csr_wen & sel_minstreth;
+    wire [31:0] mcyclel_r  ;
+    wire [31:0] mcycleh_r  ;
+    wire [31:0] minstretl_r;
+    wire [31:0] minstreth_r;
+    wire mcycleh_gon = (mcyclel_r == 32'b1);
+    wire minstretl_gon = in_retr;
+    wire minstreth_gon = in_retr & (minstretl_r == 32'b1);
+    wire [31:0] mcyclel_nxt   = wr_mcyclel ? csr_wdat
+                              :              (mcyclel_r + 1'b1);
+    wire [31:0] mcycleh_nxt   = wr_mcycleh  ? csr_wdat
+                              : mcycleh_gon ? (mcycleh_r + 1'b1)
+                              :               minstreth_r;
+    wire [31:0] minstretl_nxt = wr_minstretl  ? csr_wdat
+                              : minstretl_gon ? (minstretl_r + 1'b1)
+                              :                 minstretl_r;
+    wire [31:0] minstreth_nxt = wr_minstreth  ? csr_wdat
+                              : minstreth_gon ? (minstreth_r + 1'b1)
+                              :                 minstreth_r;
+    dffr #(32, 32'b0) mcycleld   (mcyclel_nxt,   mcyclel_r,   clk, rst_n);
+    dffr #(32, 32'b0) mcyclehd   (mcycleh_nxt,   mcycleh_r,   clk, rst_n);
+    dffr #(32, 32'b0) minstretld (minstretl_nxt, minstretl_r, clk, rst_n);
+    dffr #(32, 32'b0) minstrethd (minstreth_nxt, minstreth_r, clk, rst_n);
+    wire [31:0] cmcyclel   = mcyclel_r  ;
+    wire [31:0] cmcycleh   = mcycleh_r  ;
+    wire [31:0] cminstretl = minstretl_r;
+    wire [31:0] cminstreth = minstreth_r;
+
+    wire sel_mscratch = (csr_idx == 12'h340);
+    wire rd_mscratch  = csr_ren & sel_mscratch;
+    wire wr_mscratch  = sel_mscratch & csr_wen;
+    wire [31:0] mscratch_r;
+    wire [31:0] mscratch_nxt = csr_wdat;
+    dfflr #(32, 32'b0) mscratchd (wr_mscratch, mscratch_nxt, mscratch_r, clk, rst_n);
+    wire [31:0] cmscratch = mscratch_r;
+
+    wire sel_mepc = (csr_idx == 12'h305);
+    wire rd_mepc  = csr_ren & sel_mepc;
+    wire wr_mepc  = sel_mepc & csr_wen;
+    wire [30:0] mepc_r;
+    wire [30:0] mepc_nxt = wr_mepc  ? csr_wdat[31:1]
+                         : epc_en   ? epc_pc[31:1]
+                         :            mepc_r;
+    dffr #(31, 31'b0) mepcd (mepc_nxt, mepc_r, clk, rst_n);
+    wire [31:0] cmepc = {mepc_r,1'b0};
+
+    wire sel_mcause = (csr_idx == 12'h342);
+    wire rd_mcause = sel_mcause & csr_ren;
+    wire [31:0] cmcause = 32'b0;
+
+    wire sel_mtval = (csr_idx == 12'h343);
+    wire rd_mtval = sel_mtval & csr_ren;
+    wire [31:0] cmtval = 32'b0;
+
+    assign csr_rdat = 32'b0 
+                    | ({32{rd_mstatus  }} & cmstatus  )
+                    | ({32{rd_mie      }} & cmie      )
+                    | ({32{rd_mtvec    }} & cmtvec    )
+                    | ({32{rd_mepc     }} & cmepc     )
+                    | ({32{rd_mscratch }} & cmscratch )
+                    | ({32{rd_mcause   }} & cmcause   )
+                    | ({32{rd_mtval    }} & cmtval    )
+                    | ({32{rd_mip      }} & cmip      )
+                    | ({32{rd_misa     }} & cmisa     )
+                    | ({32{rd_mvendorid}} & cmvendorid)
+                    | ({32{rd_marchid  }} & cmarchid  )
+                    | ({32{rd_mimpid   }} & cmimpid   )
+                    | ({32{rd_mhartid  }} & cmhartid  )
+                    | ({32{rd_mcyclel  }} & cmcyclel  )
+                    | ({32{rd_mcycleh  }} & cmcycleh  )
+                    | ({32{rd_minstretl}} & cminstretl)
+                    | ({32{rd_minstreth}} & cminstreth);
 endmodule
