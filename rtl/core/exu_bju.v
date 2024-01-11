@@ -18,9 +18,12 @@ module exu_bju(
     output wire        hs_bj4cal_val,
     input              hs_cal4bj_rdy,
     output wire [`CIRNO_CAL_OPB_SIZE-1:0] o_cal_opb,
-    input       [31:0] i_cal_res
+    input       [31:0] i_cal_res,
+
+    input       [31:0] i_mepc,
+    output             o_mret
 );
-    assign hs_bj4cal_val = hs_cal4bj_rdy;
+    assign hs_bj4cal_val = hs_ex4bj_val;
     assign hs_bj4ex_rdy  = hs_cal4bj_rdy;
     
     wire opn_u = i_opb[`CIRNO_DEC_BJU_BLTU]
@@ -41,7 +44,7 @@ module exu_bju(
                                                           | i_opb[`CIRNO_DEC_BJU_BGE]
                                                           | i_opb[`CIRNO_DEC_BJU_BLTU]
                                                           | i_opb[`CIRNO_DEC_BJU_BGEU]);
-    assign o_cal_opb[`CIRNO_CAL_ADD] = 1'b0;
+    assign o_cal_opb[`CIRNO_CAL_ADD] = hs_ex4bj_val & i_opb[`CIRNO_DEC_BJU_AUIP];
     assign o_cal_opb[`CIRNO_CAL_SUB] = 1'b0;
     assign o_cal_opb[`CIRNO_CAL_SLL] = 1'b0;
     assign o_cal_opb[`CIRNO_CAL_SRL] = 1'b0;
@@ -50,15 +53,16 @@ module exu_bju(
     assign o_cal_opb[`CIRNO_CAL_OPN1] = {33{hs_ex4bj_val}} & cal_opn1;
     assign o_cal_opb[`CIRNO_CAL_OPN2] = {33{hs_ex4bj_val}} & cal_opn2;
 
-    wire bif1  = i_opb[`CIRNO_DEC_BJU_BNE ]
-               | i_opb[`CIRNO_DEC_BJU_BLT ] 
-               | i_opb[`CIRNO_DEC_BJU_BLTU];
-    wire bif0  = i_opb[`CIRNO_DEC_BJU_BEQ ]
-               | i_opb[`CIRNO_DEC_BJU_BGE ]
-               | i_opb[`CIRNO_DEC_BJU_BGEU];
-    wire justb = i_opb[`CIRNO_DEC_BJU_JAL ]
-               | i_opb[`CIRNO_DEC_BJU_JALR];
-    wire auipc = i_opb[`CIRNO_DEC_BJU_AUIP];
+    wire bif1  = (i_opb[`CIRNO_DEC_BJU_BNE ]
+                   | i_opb[`CIRNO_DEC_BJU_BLT ] 
+                   | i_opb[`CIRNO_DEC_BJU_BLTU]) & hs_ex4bj_val;
+    wire bif0  = (i_opb[`CIRNO_DEC_BJU_BEQ ]
+                   | i_opb[`CIRNO_DEC_BJU_BGE ]
+                   | i_opb[`CIRNO_DEC_BJU_BGEU]) & hs_ex4bj_val;
+    wire justb = (i_opb[`CIRNO_DEC_BJU_JAL ]
+                   | i_opb[`CIRNO_DEC_BJU_JALR]
+                   | i_opb[`CIRNO_DEC_BJU_MRET]) & hs_ex4bj_val;
+    wire auipc = (i_opb[`CIRNO_DEC_BJU_AUIP]) & hs_ex4bj_val;
 
     wire b_res = (| i_cal_res);
 
@@ -66,8 +70,12 @@ module exu_bju(
                    | (bif0 & (~b_res))
                    | (justb);
 
-    assign o_pc    = i_opb[`CIRNO_DEC_BJU_JALR] ? i_opn1 : i_pc;
-    assign o_pcadd = i_im;
+    assign o_pc    = i_opb[`CIRNO_DEC_BJU_JALR] ? i_opn1 
+                   : i_opb[`CIRNO_DEC_BJU_MRET] ? i_mepc
+                   :                              i_pc;
+    assign o_pcadd = i_opb[`CIRNO_DEC_BJU_MRET] ? 32'b0 : i_im;
 
     assign o_res = i_cal_res;
+
+    assign o_mret = i_opb[`CIRNO_DEC_BJU_MRET] & hs_ex4bj_val;
 endmodule

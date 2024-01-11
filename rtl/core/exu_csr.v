@@ -13,6 +13,8 @@ module exu_csr(
     input         epc_en,
     input  [31:0] epc_pc,
 
+    output [31:0] cmepc,
+
     input         ext_ip,
     input         tmr_ip,
     input         sft_ip,
@@ -152,7 +154,6 @@ module exu_csr(
     dffr #(1, 1'b0) meipd (ext_ip, meip_r, clk, rst_n);
     dffr #(1, 1'b0) mtipd (tmr_ip, mtip_r, clk, rst_n);
     dffr #(1, 1'b0) msipd (sft_ip, msip_r, clk, rst_n);
-    wire [31:0] mip_r;
     assign mip_r[31:12] = 20'b0;
     assign mip_r[11] = meip_r;
     assign mip_r[10:8] = 3'b0;
@@ -231,7 +232,7 @@ module exu_csr(
     dfflr #(32, 32'b0) mscratchd (wr_mscratch, mscratch_nxt, mscratch_r, clk, rst_n);
     wire [31:0] cmscratch = mscratch_r;
 
-    wire sel_mepc = (csr_idx == 12'h305);
+    wire sel_mepc = (csr_idx == 12'h341);
     wire rd_mepc  = csr_ren & sel_mepc;
     wire wr_mepc  = sel_mepc & csr_wen;
     wire [30:0] mepc_r;
@@ -239,7 +240,7 @@ module exu_csr(
                          : epc_en   ? epc_pc[31:1]
                          :            mepc_r;
     dffr #(31, 31'b0) mepcd (mepc_nxt, mepc_r, clk, rst_n);
-    wire [31:0] cmepc = {mepc_r,1'b0};
+    assign cmepc = {mepc_r,1'b0};
 
     wire sel_mcause = (csr_idx == 12'h342);
     wire rd_mcause = sel_mcause & csr_ren;

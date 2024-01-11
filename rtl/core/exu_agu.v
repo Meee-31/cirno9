@@ -29,18 +29,18 @@ module exu_agu(
     output wire        o_misal
 );
     assign hs_ag4ex_rdy = hs_cal4ag_rdy & hs_ls4ag_rdy;
-    wire lslb  = i_opb[`CIRNO_DEC_LSU_LB ]
-               | i_opb[`CIRNO_DEC_LSU_LBU];
-    wire lslh  = i_opb[`CIRNO_DEC_LSU_LH ]
-               | i_opb[`CIRNO_DEC_LSU_LHU];
-    wire lslw  = i_opb[`CIRNO_DEC_LSU_LW ];
+    wire lslb  = i_opb[`CIRNO_DEC_AGU_LB ]
+               | i_opb[`CIRNO_DEC_AGU_LBU];
+    wire lslh  = i_opb[`CIRNO_DEC_AGU_LH ]
+               | i_opb[`CIRNO_DEC_AGU_LHU];
+    wire lslw  = i_opb[`CIRNO_DEC_AGU_LW ];
 
-    wire lssb  = i_opb[`CIRNO_DEC_LSU_SB ];
-    wire lssh  = i_opb[`CIRNO_DEC_LSU_SH ];
-    wire lssw  = i_opb[`CIRNO_DEC_LSU_SW ];
+    wire lssb  = i_opb[`CIRNO_DEC_AGU_SB ];
+    wire lssh  = i_opb[`CIRNO_DEC_AGU_SH ];
+    wire lssw  = i_opb[`CIRNO_DEC_AGU_SW ];
 
-    wire res_u = i_opb[`CIRNO_DEC_LSU_LBU ]
-               | i_opb[`CIRNO_DEC_LSU_LHU];
+    wire res_u = i_opb[`CIRNO_DEC_AGU_LBU ]
+               | i_opb[`CIRNO_DEC_AGU_LHU];
 
     assign o_cal_opb[`CIRNO_CAL_ADD] = hs_ex4ag_val & (lslb | lslh 
                                                          | lslw | lssb

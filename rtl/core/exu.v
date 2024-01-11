@@ -12,6 +12,7 @@ module exu(
 
     input i_rs2_ren,
 
+    input       [11:0] i_csr_idx,
     input       [31:0] i_rs1,
     input       [31:0] i_rs2,
     input       [31:0] i_im,
@@ -35,11 +36,13 @@ module exu(
     assign hs_ex4rd_rdy = (hs_al4ex_rdy & i_usele[`CIRNO_DEC_SELE_ALU])
                         | (hs_bj4ex_rdy & i_usele[`CIRNO_DEC_SELE_BJU])
                         | (hs_ag4ex_rdy & i_usele[`CIRNO_DEC_SELE_AGU])
+                        | (hs_cs4ex_rdy & i_usele[`CIRNO_DEC_SELE_CSU])
                         | ~i_val;
 
     assign o_rd = (alex_res & {32{i_usele[`CIRNO_DEC_SELE_ALU]}})
                 | (bjex_res & {32{i_usele[`CIRNO_DEC_SELE_BJU]}})
-                | (agex_res & {32{i_usele[`CIRNO_DEC_SELE_AGU]}});
+                | (agex_res & {32{i_usele[`CIRNO_DEC_SELE_AGU]}})
+                | (csex_res & {32{i_usele[`CIRNO_DEC_SELE_CSU]}});
 
     assign o_setpc = bjex_pc_setpc;
     assign o_pc = bjex_pc_pc;
@@ -95,6 +98,8 @@ module exu(
     wire [31:0] bjex_pc_pcadd;
     wire        hs_bj4cal_val;
     wire [`CIRNO_CAL_OPB_SIZE-1:0]  bjcal_cal_opb;
+    wire [31:0] mepc;
+    wire        mret_ena;
     exu_bju  u_exu_bju (
         .hs_ex4bj_val            ( hs_ex4bj_val    ),
         .hs_bj4ex_rdy            ( hs_bj4ex_rdy    ),
@@ -110,7 +115,9 @@ module exu(
         .hs_bj4cal_val           ( hs_bj4cal_val   ),
         .hs_cal4bj_rdy           ( hs_cal4ex_rdy   ),
         .o_cal_opb               ( bjcal_cal_opb   ),
-        .i_cal_res               ( cal_res         )
+        .i_cal_res               ( cal_res         ),
+        .i_mepc                  ( mepc            ),
+        .o_mret                  ( mret_ena        )
     );
         
     wire        hs_ex4ag_val = i_usele[`CIRNO_DEC_SELE_AGU] & i_val;
@@ -149,5 +156,53 @@ module exu(
         .o_ls_wen                ( agex_ls_wen     ),
         .o_ls_ren                ( agex_ls_ren     ),
         .o_misal                 ( agex_misal      )
+    );
+
+    wire        hs_ex4cs_val = i_usele[`CIRNO_DEC_SELE_CSU] & i_val;
+    wire        hs_cs4ex_rdy;
+    wire [31:0] csex_res;
+    wire        csr_wen;
+    wire        csr_ren;
+    wire [11:0] csr_idx;
+    wire [31:0] csr_wdat;
+    wire [31:0] csr_rdat;
+    exu_csrctr  u_exu_csrctr (
+        .hs_ex4cs_val            ( hs_ex4cs_val   ),
+        .hs_cs4ex_rdy            ( hs_cs4ex_rdy   ),
+        .i_opb                   ( i_opb          ),
+        .i_opn1                  ( i_rs1         ),
+        .i_csr_idx               ( i_csr_idx      ),
+        .o_res                   ( csex_res       ),
+        .csr_wen                 ( csr_wen        ),
+        .csr_ren                 ( csr_ren        ),
+        .csr_idx                 ( csr_idx        ),
+        .csr_wdat                ( csr_wdat       ),
+        .csr_rdat                ( csr_rdat       )
+    );
+
+    wire        trap_ena = 1'b0;
+    wire        epc_en   = 1'b0;
+    wire [31:0] epc_pc = 32'b0;
+    wire        ext_ip = 1'b0;
+    wire        tmr_ip = 1'b0;
+    wire        sft_ip = 1'b0;
+    wire        in_retr = hs_ex4rd_rdy & i_val;
+    exu_csr  u_exu_csr (
+        .rst_n                   ( rst_n      ),
+        .clk                     ( clk        ),
+        .csr_wen                 ( csr_wen    ),
+        .csr_ren                 ( csr_ren    ),
+        .csr_idx                 ( csr_idx    ),
+        .csr_wdat                ( csr_wdat   ),
+        .csr_rdat                ( csr_rdat   ),
+        .mret_ena                ( mret_ena   ),
+        .trap_ena                ( trap_ena   ),
+        .epc_en                  ( epc_en     ),
+        .epc_pc                  ( epc_pc     ),
+        .cmepc                   ( mepc       ),
+        .ext_ip                  ( ext_ip     ),
+        .tmr_ip                  ( tmr_ip     ),
+        .sft_ip                  ( sft_ip     ),
+        .in_retr                 ( in_retr    )
     );
 endmodule

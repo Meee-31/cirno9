@@ -14,6 +14,7 @@ module decode(
     output wire [ 4:0] o_rs1_idx,
     output wire [ 4:0] o_rs2_idx,
     output wire [ 4:0] o_rd_idx,
+    output wire [11:0] o_csr_idx,
     output wire [31:0] o_im,
 
     output wire        o_ilgl,
@@ -55,6 +56,8 @@ module decode(
                              , i_in[20] 
                              , i_in[30:21]
                              , 1'b0};
+    wire [31:0] rv32_csim    = {27'b0, 
+                               i_in[19:15]};
 
     wire rv32_rtype = (rv32_opcode == 7'b0110011);
     wire rv32_itype = (rv32_opcode == 7'b0010011);
@@ -62,7 +65,7 @@ module decode(
     wire rv32_stype = (rv32_opcode == 7'b0100011);
     wire rv32_btype = (rv32_opcode == 7'b1100011);
     wire rv32_j     = (rv32_opcode == 7'b1101111);
-    wire rv32_jr    = (rv32_opcode == 7'b1100011);
+    wire rv32_jr    = (rv32_opcode == 7'b1100111);
     wire rv32_lui   = (rv32_opcode == 7'b0110111);
     wire rv32_auipc = (rv32_opcode == 7'b0010111);
     wire rv32_envir = (rv32_opcode == 7'b1110011);
@@ -155,7 +158,7 @@ module decode(
     wire rv32_ebreak= rv32_envir & rv32_fun3_000 & (i_in[31:20] == 12'b0000_0000_0001);
     wire rv32_mret  = rv32_envir & rv32_fun3_000 & (i_in[31:20] == 12'b0011_0000_0010);
 
-    wire [`CIRNO_DEC_OPB_SIZE-1:0] dec_alubus;
+    wire [`CIRNO_DEC_ALU_SIZE-1:0] dec_alubus;
     assign dec_alubus[`CIRNO_DEC_ALU_ADD ] = rv32_add  | rv32_addi | rv32_lui;
     assign dec_alubus[`CIRNO_DEC_ALU_SUB ] = rv32_sub;
     assign dec_alubus[`CIRNO_DEC_ALU_SLL ] = rv32_sll  | rv32_slli ;
@@ -167,7 +170,7 @@ module decode(
     assign dec_alubus[`CIRNO_DEC_ALU_OR  ] = rv32_or   | rv32_ori  ;
     assign dec_alubus[`CIRNO_DEC_ALU_AND ] = rv32_and  | rv32_andi ;
 
-    wire [`CIRNO_DEC_OPB_SIZE-1:0] dec_bjubus;
+    wire [`CIRNO_DEC_BJU_SIZE-1:0] dec_bjubus;
     assign dec_bjubus[`CIRNO_DEC_BJU_BEQ ] = rv32_beq  ;
     assign dec_bjubus[`CIRNO_DEC_BJU_BNE ] = rv32_bne  ;
     assign dec_bjubus[`CIRNO_DEC_BJU_BLT ] = rv32_blt  ;
@@ -177,41 +180,49 @@ module decode(
     assign dec_bjubus[`CIRNO_DEC_BJU_JAL ] = rv32_jal  ;
     assign dec_bjubus[`CIRNO_DEC_BJU_JALR] = rv32_jalr ;
     assign dec_bjubus[`CIRNO_DEC_BJU_AUIP] = rv32_auipc;
+    assign dec_bjubus[`CIRNO_DEC_BJU_MRET] = rv32_mret;
 
-    wire [`CIRNO_DEC_OPB_SIZE-1:0] dec_lsubus;
-    assign dec_lsubus[`CIRNO_DEC_LSU_LB ]  = rv32_lb ;
-    assign dec_lsubus[`CIRNO_DEC_LSU_LH ]  = rv32_lh ;
-    assign dec_lsubus[`CIRNO_DEC_LSU_LW ]  = rv32_lw ;
-    assign dec_lsubus[`CIRNO_DEC_LSU_LBU]  = rv32_lbu;
-    assign dec_lsubus[`CIRNO_DEC_LSU_LHU]  = rv32_lhu;
-    assign dec_lsubus[`CIRNO_DEC_LSU_SB ]  = rv32_sb ;
-    assign dec_lsubus[`CIRNO_DEC_LSU_SH ]  = rv32_sh ;
-    assign dec_lsubus[`CIRNO_DEC_LSU_SW ]  = rv32_sw ;
+    wire [`CIRNO_DEC_AGU_SIZE-1:0] dec_agubus;
+    assign dec_agubus[`CIRNO_DEC_AGU_LB ]  = rv32_lb ;
+    assign dec_agubus[`CIRNO_DEC_AGU_LH ]  = rv32_lh ;
+    assign dec_agubus[`CIRNO_DEC_AGU_LW ]  = rv32_lw ;
+    assign dec_agubus[`CIRNO_DEC_AGU_LBU]  = rv32_lbu;
+    assign dec_agubus[`CIRNO_DEC_AGU_LHU]  = rv32_lhu;
+    assign dec_agubus[`CIRNO_DEC_AGU_SB ]  = rv32_sb ;
+    assign dec_agubus[`CIRNO_DEC_AGU_SH ]  = rv32_sh ;
+    assign dec_agubus[`CIRNO_DEC_AGU_SW ]  = rv32_sw ;
+
+    wire [`CIRNO_DEC_CSU_SIZE-1:0] dec_csubus;
+    assign dec_csubus[`CIRNO_DEC_CSU_CSRRW ] = rv32_csrrw | rv32_csrrwi;
+    assign dec_csubus[`CIRNO_DEC_CSU_CSRRS ] = rv32_csrrs | rv32_csrrsi;
+    assign dec_csubus[`CIRNO_DEC_CSU_CSRRC ] = rv32_csrrc | rv32_csrrci;
 
 //    assign o_usele[`CIRNO_DEC_SELE_ALU] = (| dec_alubus);
 //    assign o_usele[`CIRNO_DEC_SELE_BJU] = (| dec_bjubus);
 //    assign o_usele[`CIRNO_DEC_SELE_LSU] = (| dec_lsubus);
 
-    assign o_usele[`CIRNO_DEC_SELE_ALU] = rv32_rtype | rv32_itype | rv32_lui;
-                                   
-    assign o_usele[`CIRNO_DEC_SELE_BJU] = rv32_btype | rv32_j     | rv32_jr ;
-    
-    assign o_usele[`CIRNO_DEC_SELE_AGU] = rv32_iload | rv32_stype ;
+    assign o_usele[`CIRNO_DEC_SELE_ALU] = rv32_rtype  | rv32_itype | rv32_lui;
+    assign o_usele[`CIRNO_DEC_SELE_BJU] = rv32_btype  | rv32_j     | rv32_jr    | rv32_mret  
+                                        | rv32_auipc;  
+    assign o_usele[`CIRNO_DEC_SELE_AGU] = rv32_iload  | rv32_stype ;
+    assign o_usele[`CIRNO_DEC_SELE_CSU] = rv32_csrrw  | rv32_csrrs | rv32_csrrc | rv32_csrrwi
+                                        | rv32_csrrsi | rv32_csrrci;
 
-    assign o_opb = dec_alubus |
-                   dec_bjubus |
-                   dec_lsubus |
-                   {`CIRNO_DEC_OPB_SIZE{1'b0}};
+    assign o_opb = {{(`CIRNO_DEC_OPB_SIZE-`CIRNO_DEC_ALU_SIZE){1'b0}}, dec_alubus} |
+                   {{(`CIRNO_DEC_OPB_SIZE-`CIRNO_DEC_BJU_SIZE){1'b0}}, dec_bjubus} |
+                   {{(`CIRNO_DEC_OPB_SIZE-`CIRNO_DEC_AGU_SIZE){1'b0}}, dec_agubus} |
+                   {{(`CIRNO_DEC_OPB_SIZE-`CIRNO_DEC_CSU_SIZE){1'b0}}, dec_csubus};
 
     assign o_rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
-                       rv32_jr;
+                       rv32_jr    | rv32_csrrw | rv32_csrrs | rv32_csrrc;
     assign o_rs2_ren = rv32_rtype | rv32_stype | rv32_btype;
-    assign o_rd_wen  = rv32_rtype | rv32_itype | rv32_iload |
-                       rv32_jr    | rv32_lui   | rv32_auipc;
+    wire rd_wen  = rv32_rtype | rv32_itype | rv32_iload |
+                   rv32_jr    | rv32_lui   | rv32_auipc |o_usele[`CIRNO_DEC_SELE_CSU];
 
-    assign o_rs1_idx = rv32_rs1;
+    assign o_rs1_idx = rv32_lui ? 5'b0 : rv32_rs1;
     assign o_rs2_idx = rv32_rs2;
     assign o_rd_idx  = rv32_rd;
+    assign o_csr_idx = i_in[31:20];
 
     wire [31:0] rv_im = ({32{rv32_itype}} & rv32_iim) |
                         ({32{rv32_stype}} & rv32_sim) |
@@ -219,7 +230,8 @@ module decode(
                         ({32{rv32_lui  }} & rv32_uim) |
                         ({32{rv32_auipc}} & rv32_uim) |
                         ({32{rv32_j    }} & rv32_jim) |
-                        ({32{rv32_jr   }} & rv32_jim);
+                        ({32{rv32_jr   }} & rv32_jim) |
+                        ({32{rv32_envir}} & rv32_csim);
 
     assign o_im = rv_im;
 
@@ -246,9 +258,11 @@ module decode(
                     (rv32_sxxi_shamt_ilgl);
 
     wire rv32_nop = (rv32_itype | rv32_rtype  | 
-                         rv32_itype | rv32_lui| 
-                         rv32_auipc)           &
+                         rv32_itype | rv32_lui   | 
+                         rv32_auipc)  &
                          rv32_rd_x0           ;
+
+    assign o_rd_wen = rd_wen & o_val;
 
     assign o_val = ~(rv32_nop) & (| o_usele);
 endmodule

@@ -47,6 +47,7 @@ wire        rd_wen;
 wire [ 4:0] rs1_idx;
 wire [ 4:0] rs2_idx;
 wire [ 4:0] rd_idx;
+wire [11:0] csr_idx;
 wire [31:0] im;
 wire        deilg;
 wire        deval;
@@ -61,6 +62,7 @@ decode  u_decode (
     .o_rs1_idx               ( rs1_idx   ),
     .o_rs2_idx               ( rs2_idx   ),
     .o_rd_idx                ( rd_idx    ),
+    .o_csr_idx               ( csr_idx   ),
     .o_im                    ( im        ),
     .o_ilgl                  ( deilg     ),
     .o_val                   ( deval     )
@@ -99,10 +101,11 @@ exu  u_exu (
     .i_opb                   ( opb          ),
     .i_usele                 ( usele        ),
     .i_rs2_ren               ( rs2_ren      ),
+    .i_csr_idx               ( csr_idx      ),
     .i_rs1                   ( rs1          ),
     .i_rs2                   ( rs2          ),
     .i_im                    ( im           ),
-    .i_pc                    ( pc_r           ),
+    .i_pc                    ( pc_r         ),
     .o_rd                    ( rd           ),
     .o_setpc                 ( setpc        ),
     .o_pc                    ( pc           ),
