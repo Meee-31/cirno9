@@ -61,7 +61,7 @@ module exu_agu(
                | ((lslw | lssw) & (| i_cal_res[1:0]));
     assign o_misal = misal & hs_ex4ag_val;
 
-    wire [31:0] o_ls_adr_r = i_cal_res;
+    assign o_ls_adr = i_cal_res;
     assign o_ls_ren = lslb | lslh | lslw;
 
     wire [3:0] swen = 4'b1111;
@@ -73,10 +73,29 @@ module exu_agu(
                     | ({4{lssh}} & shen)
                     | ({4{lssb}} & sben);
     assign o_ls_wdat = i_opn2;
-    assign o_res = i_ls_rdat;
+    wire [31:0] w_res  = i_ls_rdat;
+    wire [31:0] h_res00ff  = res_u ? {{16'b0            },  i_ls_rdat[15:0]} 
+                                   : {{16{i_ls_rdat[15]}},  i_ls_rdat[15:0]};
+    wire [31:0] h_resff00  = res_u ? {{16'b0            },  i_ls_rdat[31:16]} 
+                                   : {{16{i_ls_rdat[31]}},  i_ls_rdat[31:16]};
+    wire [31:0] b_res000f  = res_u ? {{24'b0            },  i_ls_rdat[ 7:0]} 
+                                   : {{24{i_ls_rdat[ 7]}},  i_ls_rdat[ 7:0]};
+    wire [31:0] b_res00f0  = res_u ? {{24'b0            },  i_ls_rdat[15:8]} 
+                                   : {{24{i_ls_rdat[15]}},  i_ls_rdat[15:8]};
+    wire [31:0] b_res0f00  = res_u ? {{24'b0            },  i_ls_rdat[23:16]} 
+                                   : {{24{i_ls_rdat[23]}},  i_ls_rdat[23:16]};
+    wire [31:0] b_resf000  = res_u ? {{24'b0            },  i_ls_rdat[31:24]} 
+                                   : {{24{i_ls_rdat[31]}},  i_ls_rdat[31:24]};
+    wire [31:0] h_res = i_cal_res[1] ? h_resff00 : h_res00ff;
+    wire [31:0] b_res = i_cal_res[1] ? i_cal_res[0] ? b_resf000
+                                                    : b_res0f00
+                                     : i_cal_res[0] ? b_res00f0
+                                                    : b_res000f;
+    assign o_res = ({32{lslw}} & w_res)
+                 | ({32{lslh}} & h_res)
+                 | ({32{lslb}} & b_res);
 
-    wire hs_ag4ls_val_r = hs_ex4ag_val & ~misal;
-
-    dffr #(1) val(hs_ag4ls_val_r, hs_ag4ls_val, clk, rst_n);
-    dffr #(32)adr(o_ls_adr_r, o_ls_adr, clk, rst_n);
+    assign hs_ag4ls_val = hs_ex4ag_val & ~misal;
+    //dffr #(1) val(hs_ag4ls_val_r, hs_ag4ls_val, clk, rst_n);
+    //dffr #(32)adr(o_ls_adr_r, o_ls_adr, clk, rst_n);
 endmodule

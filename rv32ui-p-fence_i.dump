@@ -1,0 +1,171 @@
+
+rv32ui-p-fence_i：     文件格式 elf32-littleriscv
+
+
+Disassembly of section .text.init:
+
+80000000 <_start>:
+80000000:	0480006f          	j	80000048 <reset_vector>
+
+80000004 <trap_vector>:
+80000004:	34202f73          	csrr	t5,mcause
+80000008:	00800f93          	li	t6,8
+8000000c:	03ff0863          	beq	t5,t6,8000003c <write_tohost>
+80000010:	00900f93          	li	t6,9
+80000014:	03ff0463          	beq	t5,t6,8000003c <write_tohost>
+80000018:	00b00f93          	li	t6,11
+8000001c:	03ff0063          	beq	t5,t6,8000003c <write_tohost>
+80000020:	00000f13          	li	t5,0
+80000024:	000f0463          	beqz	t5,8000002c <trap_vector+0x28>
+80000028:	000f0067          	jr	t5
+8000002c:	34202f73          	csrr	t5,mcause
+80000030:	000f5463          	bgez	t5,80000038 <handle_exception>
+80000034:	0040006f          	j	80000038 <handle_exception>
+
+80000038 <handle_exception>:
+80000038:	539e6e13          	or	t3,t3,1337
+
+8000003c <write_tohost>:
+8000003c:	00001f17          	auipc	t5,0x1
+80000040:	fdcf2223          	sw	t3,-60(t5) # 80001000 <tohost>
+80000044:	ff9ff06f          	j	8000003c <write_tohost>
+
+80000048 <reset_vector>:
+80000048:	f1402573          	csrr	a0,mhartid
+8000004c:	00051063          	bnez	a0,8000004c <reset_vector+0x4>
+80000050:	00000e13          	li	t3,0
+80000054:	00000297          	auipc	t0,0x0
+80000058:	fb028293          	add	t0,t0,-80 # 80000004 <trap_vector>
+8000005c:	30529073          	csrw	mtvec,t0
+80000060:	30102573          	csrr	a0,misa
+80000064:	00055863          	bgez	a0,80000074 <reset_vector+0x2c>
+80000068:	0ff0000f          	fence
+8000006c:	00100e13          	li	t3,1
+80000070:	00000073          	ecall
+80000074:	30205073          	csrw	medeleg,0
+80000078:	30305073          	csrw	mideleg,0
+8000007c:	30405073          	csrw	mie,0
+80000080:	00000293          	li	t0,0
+80000084:	00028c63          	beqz	t0,8000009c <reset_vector+0x54>
+80000088:	10529073          	csrw	stvec,t0
+8000008c:	1ab00293          	li	t0,427
+80000090:	30229073          	csrw	medeleg,t0
+80000094:	30202373          	csrr	t1,medeleg
+80000098:	fa6290e3          	bne	t0,t1,80000038 <handle_exception>
+8000009c:	30005073          	csrw	mstatus,0
+800000a0:	00000297          	auipc	t0,0x0
+800000a4:	01428293          	add	t0,t0,20 # 800000b4 <reset_vector+0x6c>
+800000a8:	34129073          	csrw	mepc,t0
+800000ac:	f1402573          	csrr	a0,mhartid
+800000b0:	30200073          	mret
+800000b4:	06f00693          	li	a3,111
+800000b8:	00002517          	auipc	a0,0x2
+800000bc:	f4851503          	lh	a0,-184(a0) # 80002000 <begin_signature>
+800000c0:	00002597          	auipc	a1,0x2
+800000c4:	f4259583          	lh	a1,-190(a1) # 80002002 <begin_signature+0x2>
+800000c8:	00000013          	nop
+800000cc:	00000013          	nop
+800000d0:	00000013          	nop
+800000d4:	00000013          	nop
+800000d8:	00000013          	nop
+800000dc:	00000013          	nop
+800000e0:	00000013          	nop
+800000e4:	00000013          	nop
+800000e8:	00000013          	nop
+800000ec:	00000013          	nop
+800000f0:	00000013          	nop
+800000f4:	00000013          	nop
+800000f8:	00000013          	nop
+800000fc:	00000013          	nop
+80000100:	00002297          	auipc	t0,0x2
+80000104:	f0a29223          	sh	a0,-252(t0) # 80002004 <begin_signature+0x4>
+80000108:	00002297          	auipc	t0,0x2
+8000010c:	eeb29f23          	sh	a1,-258(t0) # 80002006 <begin_signature+0x6>
+80000110:	0000100f          	fence.i
+80000114:	00002797          	auipc	a5,0x2
+80000118:	ef078793          	add	a5,a5,-272 # 80002004 <begin_signature+0x4>
+8000011c:	00078367          	jalr	t1,a5
+
+80000120 <test_2>:
+80000120:	00200e13          	li	t3,2
+80000124:	00000013          	nop
+80000128:	1bc00393          	li	t2,444
+8000012c:	06769a63          	bne	a3,t2,800001a0 <fail>
+80000130:	06400713          	li	a4,100
+80000134:	fff70713          	add	a4,a4,-1
+80000138:	fe071ee3          	bnez	a4,80000134 <test_2+0x14>
+8000013c:	00002297          	auipc	t0,0x2
+80000140:	eca29823          	sh	a0,-304(t0) # 8000200c <begin_signature+0xc>
+80000144:	00002297          	auipc	t0,0x2
+80000148:	ecb29523          	sh	a1,-310(t0) # 8000200e <begin_signature+0xe>
+8000014c:	0000100f          	fence.i
+80000150:	00000013          	nop
+80000154:	00000013          	nop
+80000158:	00000013          	nop
+8000015c:	00000013          	nop
+80000160:	00000013          	nop
+80000164:	00000013          	nop
+80000168:	00000013          	nop
+8000016c:	00000013          	nop
+80000170:	00000013          	nop
+80000174:	00000013          	nop
+80000178:	00000013          	nop
+8000017c:	00000013          	nop
+80000180:	00002797          	auipc	a5,0x2
+80000184:	e8c78793          	add	a5,a5,-372 # 8000200c <begin_signature+0xc>
+80000188:	00078367          	jalr	t1,a5
+
+8000018c <test_3>:
+8000018c:	00300e13          	li	t3,3
+80000190:	00000013          	nop
+80000194:	30900393          	li	t2,777
+80000198:	00769463          	bne	a3,t2,800001a0 <fail>
+8000019c:	01c01c63          	bne	zero,t3,800001b4 <pass>
+
+800001a0 <fail>:
+800001a0:	0ff0000f          	fence
+800001a4:	000e0063          	beqz	t3,800001a4 <fail+0x4>
+800001a8:	001e1e13          	sll	t3,t3,0x1
+800001ac:	001e6e13          	or	t3,t3,1
+800001b0:	00000073          	ecall
+
+800001b4 <pass>:
+800001b4:	0ff0000f          	fence
+800001b8:	00100e13          	li	t3,1
+800001bc:	00000073          	ecall
+800001c0:	c0001073          	unimp
+800001c4:	0000                	.insn	2, 0x
+800001c6:	0000                	.insn	2, 0x
+800001c8:	0000                	.insn	2, 0x
+800001ca:	0000                	.insn	2, 0x
+800001cc:	0000                	.insn	2, 0x
+800001ce:	0000                	.insn	2, 0x
+800001d0:	0000                	.insn	2, 0x
+800001d2:	0000                	.insn	2, 0x
+800001d4:	0000                	.insn	2, 0x
+800001d6:	0000                	.insn	2, 0x
+800001d8:	0000                	.insn	2, 0x
+800001da:	0000                	.insn	2, 0x
+800001dc:	0000                	.insn	2, 0x
+800001de:	0000                	.insn	2, 0x
+800001e0:	0000                	.insn	2, 0x
+800001e2:	0000                	.insn	2, 0x
+800001e4:	0000                	.insn	2, 0x
+800001e6:	0000                	.insn	2, 0x
+800001e8:	0000                	.insn	2, 0x
+800001ea:	0000                	.insn	2, 0x
+
+Disassembly of section .data:
+
+80002000 <begin_signature>:
+80002000:	14d68693          	add	a3,a3,333
+80002004:	0de68693          	add	a3,a3,222
+80002008:	000307e7          	jalr	a5,t1
+8000200c:	22b68693          	add	a3,a3,555
+80002010:	000307e7          	jalr	a5,t1
+80002014:	0000                	.insn	2, 0x
+80002016:	0000                	.insn	2, 0x
+80002018:	0000                	.insn	2, 0x
+8000201a:	0000                	.insn	2, 0x
+8000201c:	0000                	.insn	2, 0x
+8000201e:	0000                	.insn	2, 0x

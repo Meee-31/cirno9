@@ -18,7 +18,8 @@ module decode(
     output wire [31:0] o_im,
 
     output wire        o_ilgl,
-    output wire        o_val
+    output wire        o_val,
+    output wire [ 1:0] o_ecallbreak
 );
 
     wire [ 6: 0] rv32_opcode = i_in[ 6: 0];
@@ -158,6 +159,8 @@ module decode(
     wire rv32_ebreak= rv32_envir & rv32_fun3_000 & (i_in[31:20] == 12'b0000_0000_0001);
     wire rv32_mret  = rv32_envir & rv32_fun3_000 & (i_in[31:20] == 12'b0011_0000_0010);
 
+    wire rv32_fence = (rv32_opcode == 7'b0001111);
+
     wire [`CIRNO_DEC_ALU_SIZE-1:0] dec_alubus;
     assign dec_alubus[`CIRNO_DEC_ALU_ADD ] = rv32_add  | rv32_addi | rv32_lui;
     assign dec_alubus[`CIRNO_DEC_ALU_SUB ] = rv32_sub;
@@ -216,8 +219,8 @@ module decode(
     assign o_rs1_ren = rv32_rtype | rv32_itype | rv32_iload | rv32_btype |
                        rv32_jr    | rv32_csrrw | rv32_csrrs | rv32_csrrc;
     assign o_rs2_ren = rv32_rtype | rv32_stype | rv32_btype;
-    wire rd_wen  = rv32_rtype | rv32_itype | rv32_iload |
-                   rv32_jr    | rv32_lui   | rv32_auipc |o_usele[`CIRNO_DEC_SELE_CSU];
+    wire rd_wen  = rv32_rtype | rv32_itype | rv32_iload | rv32_j |
+                   rv32_jr    | rv32_lui   | rv32_auipc | o_usele[`CIRNO_DEC_SELE_CSU];
 
     assign o_rs1_idx = rv32_lui ? 5'b0 : rv32_rs1;
     assign o_rs2_idx = rv32_rs2;
@@ -225,12 +228,13 @@ module decode(
     assign o_csr_idx = i_in[31:20];
 
     wire [31:0] rv_im = ({32{rv32_itype}} & rv32_iim) |
+                        ({32{rv32_iload}} & rv32_iim) |
                         ({32{rv32_stype}} & rv32_sim) |
                         ({32{rv32_btype}} & rv32_bim) |
                         ({32{rv32_lui  }} & rv32_uim) |
                         ({32{rv32_auipc}} & rv32_uim) |
                         ({32{rv32_j    }} & rv32_jim) |
-                        ({32{rv32_jr   }} & rv32_jim) |
+                        ({32{rv32_jr   }} & rv32_iim) |
                         ({32{rv32_envir}} & rv32_csim);
 
     assign o_im = rv_im;
@@ -257,12 +261,15 @@ module decode(
     assign o_ilgl = (rv_all0s1s_ilgl     ) |
                     (rv32_sxxi_shamt_ilgl);
 
-    wire rv32_nop = (rv32_itype | rv32_rtype  | 
+    wire rv32_nop = ((rv32_itype | rv32_rtype  | 
                          rv32_itype | rv32_lui   | 
                          rv32_auipc)  &
-                         rv32_rd_x0           ;
+                         rv32_rd_x0)
+                  | rv32_fence         ;
 
     assign o_rd_wen = rd_wen & o_val;
 
-    assign o_val = ~(rv32_nop) & (| o_usele);
+    assign o_val = ~(rv32_nop) & (| o_usele) & (~o_ilgl);
+
+    assign o_ecallbreak = {rv32_ecall, rv32_ebreak};
 endmodule

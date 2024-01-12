@@ -8,12 +8,14 @@ module exu_csr(
     input  [31:0] csr_wdat,
     output [31:0] csr_rdat,
 
+    output [31:0] cmepc,
     input         mret_ena,
-    input         trap_ena,
-    input         epc_en,
+    output [31:0] cmtvec,
+    input         int_ena,
+    input  [31:0] i_mcause,
     input  [31:0] epc_pc,
 
-    output [31:0] cmepc,
+
 
     input         ext_ip,
     input         tmr_ip,
@@ -120,13 +122,13 @@ module exu_csr(
     wire [1:0] status_mpp_nxt  = status_nxt[12:11]; 
     wire [1:0] status_vs_nxt   = status_nxt[10:9];
     wire status_spp_nxt  = status_nxt[8];  
-    wire status_mpie_nxt = trap_ena   ? status_mie_r
+    wire status_mpie_nxt = int_ena   ? status_mie_r
                          : mret_ena   ? 1'b1
                          : wr_mstatus ? status_nxt[7]
                          :              status_mpie_r;
     wire status_ube_nxt  = status_nxt[6];  
     wire status_spie_nxt = status_nxt[5];
-    wire status_mie_nxt  = trap_ena   ? 1'b0
+    wire status_mie_nxt  = int_ena   ? 1'b0
                          : mret_ena   ? status_mpie_r
                          : wr_mstatus ? status_nxt[3]
                          :              status_mie_r;
@@ -141,7 +143,7 @@ module exu_csr(
     wire [31:0] mtvec_r;
     wire [31:0] mtvec_nxt = csr_wdat;
     dfflr #(32, 32'b0) mtvecd (wr_mtvec, mtvec_nxt, mtvec_r, clk, rst_n);
-    wire [31:0] cmtvec = mtvec_r;
+    assign cmtvec = mtvec_r;
 
     wire sel_mip = (csr_idx == 12'h344);
     wire rd_mip = sel_mip & csr_ren;
@@ -237,14 +239,21 @@ module exu_csr(
     wire wr_mepc  = sel_mepc & csr_wen;
     wire [30:0] mepc_r;
     wire [30:0] mepc_nxt = wr_mepc  ? csr_wdat[31:1]
-                         : epc_en   ? epc_pc[31:1]
+                         : int_ena  ? epc_pc[31:1]
                          :            mepc_r;
     dffr #(31, 31'b0) mepcd (mepc_nxt, mepc_r, clk, rst_n);
     assign cmepc = {mepc_r,1'b0};
 
     wire sel_mcause = (csr_idx == 12'h342);
-    wire rd_mcause = sel_mcause & csr_ren;
-    wire [31:0] cmcause = 32'b0;
+    wire rd_mcause  = csr_ren & sel_mcause;
+    wire wr_mcause  = sel_mcause & csr_wen;
+    wire [31:0] mcause_r;
+    wire [31:0] mcause_nxt = wr_mcause  ? csr_wdat[31:0]
+                           : int_ena    ? i_mcause
+                           :              mcause_r;
+    dffr #(32, 32'b0) mcaused (mcause_nxt, mcause_r, clk, rst_n);
+    wire [31:0] cmcause = {mcause_r};
+
 
     wire sel_mtval = (csr_idx == 12'h343);
     wire rd_mtval = sel_mtval & csr_ren;

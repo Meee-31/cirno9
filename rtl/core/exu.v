@@ -7,6 +7,7 @@ module exu(
 
     input i_val,
     input i_deilg,
+    input [1:0]i_ecabr,
     input [`CIRNO_DEC_OPB_SIZE-1:0] i_opb,
     input [`CIRNO_DEC_USELE   -1:0] i_usele,
 
@@ -30,8 +31,7 @@ module exu(
     output wire [31:0] o_ls_wdat,
     input       [31:0] i_ls_rdat,
     output wire [ 3:0] o_ls_wen,
-    output wire        o_ls_ren,
-    output wire        o_ilg
+    output wire        o_ls_ren
 );
     assign hs_ex4rd_rdy = (hs_al4ex_rdy & i_usele[`CIRNO_DEC_SELE_ALU])
                         | (hs_bj4ex_rdy & i_usele[`CIRNO_DEC_SELE_BJU])
@@ -56,7 +56,7 @@ module exu(
     assign exag_ls_rdat = i_ls_rdat;
     assign o_ls_ren = agex_ls_ren;
 
-    assign o_ilg = agex_misal | i_deilg;
+    wire ilg = agex_misal | i_deilg;
 
     wire hs_ex4cal_val = hs_ag4cal_val | hs_bj4cal_val | hs_al4cal_val;
     wire hs_cal4ex_rdy;
@@ -100,6 +100,8 @@ module exu(
     wire [`CIRNO_CAL_OPB_SIZE-1:0]  bjcal_cal_opb;
     wire [31:0] mepc;
     wire        mret_ena;
+    wire [31:0] mtvec;
+    wire        int_ena;
     exu_bju  u_exu_bju (
         .hs_ex4bj_val            ( hs_ex4bj_val    ),
         .hs_bj4ex_rdy            ( hs_bj4ex_rdy    ),
@@ -117,7 +119,9 @@ module exu(
         .o_cal_opb               ( bjcal_cal_opb   ),
         .i_cal_res               ( cal_res         ),
         .i_mepc                  ( mepc            ),
-        .o_mret                  ( mret_ena        )
+        .o_mret                  ( mret_ena        ),
+        .i_mtvec                 ( mtvec           ),
+        .i_int_ena               ( int_ena         )
     );
         
     wire        hs_ex4ag_val = i_usele[`CIRNO_DEC_SELE_AGU] & i_val;
@@ -180,13 +184,12 @@ module exu(
         .csr_rdat                ( csr_rdat       )
     );
 
-    wire        trap_ena = 1'b0;
     wire        epc_en   = 1'b0;
     wire [31:0] epc_pc = 32'b0;
     wire        ext_ip = 1'b0;
     wire        tmr_ip = 1'b0;
     wire        sft_ip = 1'b0;
-    wire        in_retr = hs_ex4rd_rdy & i_val;
+    wire        in_retr = hs_ex4rd_rdy & i_val & ~ilg;
     exu_csr  u_exu_csr (
         .rst_n                   ( rst_n      ),
         .clk                     ( clk        ),
@@ -195,14 +198,25 @@ module exu(
         .csr_idx                 ( csr_idx    ),
         .csr_wdat                ( csr_wdat   ),
         .csr_rdat                ( csr_rdat   ),
-        .mret_ena                ( mret_ena   ),
-        .trap_ena                ( trap_ena   ),
-        .epc_en                  ( epc_en     ),
-        .epc_pc                  ( epc_pc     ),
         .cmepc                   ( mepc       ),
+        .mret_ena                ( mret_ena   ),
+        .cmtvec                  ( mtvec      ),
+        .int_ena                 ( int_ena    ),
+        .i_mcause                ( mcause     ),
+        .epc_pc                  ( i_pc       ),
         .ext_ip                  ( ext_ip     ),
         .tmr_ip                  ( tmr_ip     ),
         .sft_ip                  ( sft_ip     ),
         .in_retr                 ( in_retr    )
+    );
+
+    wire        hs_in4ex_rdy;
+    wire [31:0] mcause;
+    exu_intc  u_exu_intc (
+        .hs_in4ex_rdy            (   ),
+        .i_ecabr                 ( i_ecabr        ),
+        .i_ilg                   ( ilg            ),
+        .o_int_ena               ( int_ena        ),
+        .o_mcause                ( mcause         )
     );
 endmodule
