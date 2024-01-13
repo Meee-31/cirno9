@@ -42,16 +42,15 @@ module exu_cal(
     wire [32:0] xoropn2 = {33{opxor}} & opn2;
 
     wire [32:0] addsub_res = addopn1 + addopn2;
-    wire [32:0] sr_res = sropn1 >>> sropn2;
-    wire [32:0] sl_res = {            sr_res[ 1], sr_res[ 2], sr_res[ 3],
+    wire [32:0] sr_res = ($signed(sropn1)) >>> sropn2;
+    wire [31:0] sl_res = {sr_res[ 0], sr_res[ 1], sr_res[ 2], sr_res[ 3],
                           sr_res[ 4], sr_res[ 5], sr_res[ 6], sr_res[ 7],
                           sr_res[ 8], sr_res[ 9], sr_res[10], sr_res[11],
                           sr_res[12], sr_res[13], sr_res[14], sr_res[15],
                           sr_res[16], sr_res[17], sr_res[18], sr_res[19],
                           sr_res[20], sr_res[21], sr_res[22], sr_res[23],
                           sr_res[24], sr_res[25], sr_res[26], sr_res[27],
-                          sr_res[28], sr_res[29], sr_res[30], sr_res[31],
-                          sr_res[32], 1'b0};
+                          sr_res[28], sr_res[29], sr_res[30], sr_res[31]};
     wire [32:0] xor_res = xoropn1 ^ xoropn2;
     wire [32:0] cmp_res = {32'b0, addsub_res[32]};
 

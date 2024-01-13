@@ -43,16 +43,16 @@ module tb_top();
          $finish;
     end
 
-    reg [7:0] sram_mem [0:65535];
+    reg [7:0] sram_mem [32'h80000000:32'h80010000];
     integer i;
     initial begin
-        $readmemh({"rv32ui-p-fence_i.verilog"}, sram_mem);
+        $readmemh({"rv32ui-p-xori.verilog"}, sram_mem);
         
         for (i=0; i<16383;i=i+1) begin
-            `SRAM[i][00+7:00] = sram_mem[i*4+0];
-            `SRAM[i][08+7:08] = sram_mem[i*4+1];
-            `SRAM[i][16+7:16] = sram_mem[i*4+2];
-            `SRAM[i][24+7:24] = sram_mem[i*4+3];
+            `SRAM[i][00+7:00] = sram_mem[32'h80000000 + i*4+0];
+            `SRAM[i][08+7:08] = sram_mem[32'h80000000 + i*4+1];
+            `SRAM[i][16+7:16] = sram_mem[32'h80000000 + i*4+2];
+            `SRAM[i][24+7:24] = sram_mem[32'h80000000 + i*4+3];
         end
         $display("RAM 0x00: %h", `SRAM[00]);
         $display("RAM 0x01: %h", `SRAM[01]);
@@ -87,7 +87,7 @@ module tb_top();
             $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             $display("~~~~~~~~~~~~~CHECK YOUY BAKA DESIGN!~~~~~~~~~~~~~~");
             end
-             $display("~~~~~~~~~~~~~~~~~~~~t3 %h~~~~~~~~~~~~~~~~~~~~~~~", t3);
+             $display("~~~~~~~~~~~~~~~~~~t3 %h~~~~~~~~~~~~~~~~~~~~", t3);
             #10 $finish;
     end
     always

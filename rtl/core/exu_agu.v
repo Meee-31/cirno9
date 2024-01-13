@@ -72,7 +72,21 @@ module exu_agu(
     assign o_ls_wen = ({4{lssw}} & swen)
                     | ({4{lssh}} & shen)
                     | ({4{lssb}} & sben);
-    assign o_ls_wdat = i_opn2;
+    wire [31:0] w_wdat = i_opn2;
+    wire [31:0] h_wdat00ff = i_opn2;
+    wire [31:0] h_wdatff00 = {i_opn2[15:0], 16'b0};
+    wire [31:0] b_wdat000f = i_opn2;
+    wire [31:0] b_wdat00f0 = {i_opn2[23:0], 8'b0};
+    wire [31:0] b_wdat0f00 = {i_opn2[15:0], 16'b0};
+    wire [31:0] b_wdatf000 = {i_opn2[ 7:0], 24'b0};
+    wire [31:0] h_wdat = i_cal_res[1] ? h_wdatff00 : h_wdat00ff;
+    wire [31:0] b_wdat = i_cal_res[1] ? i_cal_res[0] ? b_wdatf000
+                                                     : b_wdat0f00
+                                      : i_cal_res[0] ? b_wdat00f0
+                                                     : b_wdat000f;
+    assign o_ls_wdat = ({32{lssw}} & w_wdat)
+                     | ({32{lssh}} & h_wdat)
+                     | ({32{lssb}} & b_wdat);
     wire [31:0] w_res  = i_ls_rdat;
     wire [31:0] h_res00ff  = res_u ? {{16'b0            },  i_ls_rdat[15:0]} 
                                    : {{16{i_ls_rdat[15]}},  i_ls_rdat[15:0]};

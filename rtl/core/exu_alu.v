@@ -18,7 +18,8 @@ module exu_alu(
     assign hs_al4ex_rdy = hs_cal4al_rdy;
     assign hs_al4cal_val = cal_op;
 
-    wire opn_u = i_opb[`CIRNO_DEC_ALU_SLTU];
+    wire opn_u = i_opb[`CIRNO_DEC_ALU_SLTU]
+               | i_opb[`CIRNO_DEC_ALU_SRL];
 
     wire cal_op = (| o_cal_opb);
     wire alu_op = (and_op | or_op);
