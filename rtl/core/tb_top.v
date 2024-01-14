@@ -46,7 +46,7 @@ module tb_top();
     reg [7:0] sram_mem [32'h80000000:32'h80010000];
     integer i;
     initial begin
-        $readmemh({"rv32ui-p-xori.verilog"}, sram_mem);
+        $readmemh({"rv32ui-p-.verilog"}, sram_mem);
         
         for (i=0; i<16383;i=i+1) begin
             `SRAM[i][00+7:00] = sram_mem[32'h80000000 + i*4+0];

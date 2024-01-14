@@ -66,14 +66,15 @@ module exu_bju(
     wire justb = ((i_opb[`CIRNO_DEC_BJU_JAL ]
                    | i_opb[`CIRNO_DEC_BJU_JALR]
                    | i_opb[`CIRNO_DEC_BJU_MRET]) 
-               & hs_ex4bj_val) | i_int_ena;
+               & hs_ex4bj_val);
     wire auipc = (i_opb[`CIRNO_DEC_BJU_AUIP]) & hs_ex4bj_val;
 
     wire b_res = (| i_cal_res);
 
     assign o_setpc = (bif1 & b_res   )
                    | (bif0 & (~b_res))
-                   | (justb);
+                   | (justb)
+                   | i_int_ena;
 
     assign o_pc    = i_opb[`CIRNO_DEC_BJU_JALR] ? i_opn1
                    : i_int_ena                  ? i_mtvec
