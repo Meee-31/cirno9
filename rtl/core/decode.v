@@ -1,4 +1,4 @@
-`include "cirno9_define.v"
+`include "./core/cirno9_define.v"
 
 module decode(   
     input       [31:0] i_in,

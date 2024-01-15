@@ -1,6 +1,5 @@
-`include "cirno9_cpu_top.v"
 
-module tb_top();
+module isatb();
   
     reg  clk;
     reg  rst_n;
@@ -46,7 +45,7 @@ module tb_top();
     reg [7:0] sram_mem [32'h80000000:32'h80010000];
     integer i;
     initial begin
-        $readmemh({"rv32ui-p-.verilog"}, sram_mem);
+        $readmemh({"a.verilog"}, sram_mem);
         
         for (i=0; i<16383;i=i+1) begin
             `SRAM[i][00+7:00] = sram_mem[32'h80000000 + i*4+0];
@@ -102,8 +101,8 @@ module tb_top();
     
     initial
     begin            
-        $dumpfile("tb_top.vcd");        //生成的vcd文件名称
-        $dumpvars(0, tb_top);    //tb模块名称
+        $dumpfile("isatb.vcd");        //生成的vcd文件名称
+        $dumpvars(0, isatb);    //tb模块名称
     end
 
 endmodule

@@ -1,5 +1,5 @@
-`include "./cirno9_core.v"
-`include "../rams/sram32.v"
+`include "./core/cirno9_core.v"
+`include "./rams/sram32.v"
 
 module cirno9_cpu_top(
     input rst_n,

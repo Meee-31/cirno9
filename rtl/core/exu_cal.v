@@ -1,4 +1,4 @@
-`include "cirno9_define.v"
+`include "./core/cirno9_define.v"
 
 module exu_cal(
     input              hs_ex4cal_val,

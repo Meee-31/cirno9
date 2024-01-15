@@ -1,4 +1,4 @@
-`include "cirno9_define.v"
+`include "./core/cirno9_define.v"
 
 module lsu(
     input         hs_ram4ls_rdy,
