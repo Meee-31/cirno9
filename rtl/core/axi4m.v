@@ -48,7 +48,7 @@ module axi4m #(
     input                     val,
     output                    rdy,
     input  [31:0]             adr,
-    input  [4:0]              wen,
+    input  [3:0]              wen,
     input  [31:0]             wdat,
     output [31:0]             rdat
     );
@@ -73,4 +73,38 @@ module axi4m #(
                   | ((state_r == WRESPONSE) & b_hs);
 
     dfflr #(2, 2'b0) stated (state_en, state_nx, state_r, clk, rst_n);
+
+    assign m_axi_awlen   = 8'b0;
+    assign m_axi_awsize  = 3'b010;
+    assign m_axi_awburst = 2'b01;
+    assign m_axi_awlock  = 1'b0;
+    assign m_axi_awcache = 4'b0010;
+    assign m_axi_awprot  = 3'b0;
+    assign m_axi_awqos   = 4'b0;
+    assign m_axi_awaddr  = adr;
+    assign m_axi_awvalid = (| wen) & val & (state_r == IDLE);
+
+    assign m_axi_wlast   = 1'b1;
+    assign m_axi_wdata   = wdat;
+    assign m_axi_wstrb   = wen;
+    assign m_axi_wvalid  = (state_r == WRITE);
+
+    assign m_axi_bready  = state_r == WRESPONSE;
+
+    assign m_axi_arlen   = 8'b0;
+    assign m_axi_arsize  = 3'b010;
+    assign m_axi_arburst = 2'b01;
+    assign m_axi_arlock  = 1'b0;
+    assign m_axi_arcache = 4'b0010;
+    assign m_axi_arprot  = 3'b0;
+    assign m_axi_arqos   = 4'b0;
+    assign m_axi_araddr  = adr;
+    assign m_axi_arvalid = (~(| wen)) & val & (state_r == IDLE);
+    
+    assign m_axi_rready  = state_r == READ;
+
+    assign rdy = (m_axi_rready | m_axi_bready) & state_en;
+    wire [AXI_DATA_W-1:0] rdat_keep = m_axi_rdata;
+    wire rdat_ena = (state_r == READ ) & r_hs;
+    dffl #(AXI_DATA_W) rdatd(rdat_ena, rdat_keep, rdat, clk);
 endmodule
