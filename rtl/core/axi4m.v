@@ -73,7 +73,7 @@ module axi4m #(
                   | ((state_r == WRESPONSE) & b_hs);
 
     dfflr #(2, 2'b0) stated (state_en, state_nx, state_r, clk, rst_n);
-
+    
     assign m_axi_awlen   = 8'b0;
     assign m_axi_awsize  = 3'b010;
     assign m_axi_awburst = 2'b01;
@@ -104,7 +104,5 @@ module axi4m #(
     assign m_axi_rready  = state_r == READ;
 
     assign rdy = (m_axi_rready | m_axi_bready) & state_en;
-    wire [AXI_DATA_W-1:0] rdat_keep = m_axi_rdata;
-    wire rdat_ena = (state_r == READ ) & r_hs;
-    dffl #(AXI_DATA_W) rdatd(rdat_ena, rdat_keep, rdat, clk);
+    assign rdat = m_axi_rdata;
 endmodule
