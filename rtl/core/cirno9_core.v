@@ -1,42 +1,41 @@
-`include "./core/cirno9_define.v"
+//`include "./core/cirno9_define.v"
+`include "cirno9_define.v"
 
 module cirno9_core(
     input         rst_n,
     input         clk,
 
-    input         i_hs_ram4ls_rdy,
+    output        o_hs_ls4sram_val,
     output        o_sram_ren,
     output [ 3:0] o_sram_wen,
     input  [31:0] i_sram_rdat,
     output [31:0] o_adr,
     output [31:0] o_wdat
 );
+    wire        hs_ex4rd_rdy;
+    wire        hs_rd4ex_val;
     wire [31:0] pc_r;
     wire        setpc;
     wire [31:0] pc;
     wire [31:0] pcadd;
     wire [31:0] pc_nx;
-    pc  u_pc (
-        .i_pc_r                  ( pc_r    ),
-        .i_setpc                 ( setpc   ),
-        .i_pc                    ( pc      ),
-        .i_pcadd                 ( pcadd   ),
-        .o_pc_nx                 ( pc_nx   )
-    );
-    
     wire        hs_rd4ls_val;
     wire        hs_ls4rd_rdy;
     wire [31:0] valin;
-    rd  u_rd (
+    ifu  u_if (
         .clk                     ( clk         ),
         .rst_n                   ( rst_n       ),
         .rdy                     ( hs_ex4rd_rdy),
+        .val                     ( hs_rd4ex_val),
         .hs_rd4ls_val            ( hs_rd4ls_val),
         .hs_ls4rd_rdy            ( hs_ls4rd_rdy),
-        .i_pc_nx                 ( pc_nx       ),
-        .o_pc_r                  ( pc_r        ),
+        .o_pc_nx                 ( pc_nx   ),
         .i_in_r                  ( rdat        ),
-        .o_in                    ( valin       )
+        .o_in                    ( valin       ),
+        .o_pc_r                  ( pc_r        ),
+        .i_setpc                 ( setpc   ),
+        .i_pc                    ( pc      ),
+        .i_pcadd                 ( pcadd   )
     );
     
     wire [`CIRNO_DEC_OPB_SIZE-1:0]  opb;
@@ -53,6 +52,7 @@ module cirno9_core(
     wire        deval;
     wire [ 1:0] ecabr;
     decode  u_decode (
+        .i_val                   ( hs_rd4ex_val),
         .i_in                    ( valin     ),
         .i_pc                    ( pc_r      ),
         .o_opb                   ( opb       ),
@@ -85,7 +85,6 @@ module cirno9_core(
         .read_src2_dat           ( rs2      )
     );
     
-    wire        hs_ex4rd_rdy;
     wire [31:0] rd;
     wire        hs_ls4ex_rdy;
     wire        hs_ex4ls_val;
@@ -95,7 +94,7 @@ module cirno9_core(
     wire        agls_ren;
     exu  u_exu (
         .clk                     ( clk          ),
-        .rst_n                   ( rst_n           ),
+        .rst_n                   ( rst_n        ),
         .hs_ex4rd_rdy            ( hs_ex4rd_rdy ),
         .i_val                   ( deval        ),
         .i_deilg                 ( deilg        ),
@@ -120,7 +119,7 @@ module cirno9_core(
         .o_ls_wen                ( agls_wen     ),
         .o_ls_ren                ( agls_ren     )
     );
-
+    
     wire        hs_ls4axim_val;
     wire        hs_axim4ls_rdy;
     wire [ 3:0] axim_wen;
@@ -136,7 +135,9 @@ module cirno9_core(
     wire        axis_ren;
     wire [31:0] rdat;
     lsu  u_lsu (
-        .hs_ram4ls_rdy           ( i_hs_ram4ls_rdy  ),
+        .clk                     ( clk              ),
+        .rst_n                   ( rst_n            ),
+        .hs_ls4sram_val          ( o_hs_ls4sram_val ),
         .o_sram_ren              ( o_sram_ren       ),
         .o_sram_wen              ( o_sram_wen       ),
         .i_sram_rdat             ( i_sram_rdat      ),
@@ -149,7 +150,7 @@ module cirno9_core(
         .o_wdat                  ( o_wdat           ),
         .hs_rd4ls_val            ( hs_rd4ls_val     ),
         .hs_ls4rd_rdy            ( hs_ls4rd_rdy     ),
-        .i_pc                    ( pc_r             ),
+        .i_pc                    ( pc_nx            ),
         .hs_ag4ls_val            ( hs_ex4ls_val     ),
         .hs_ls4ag_rdy            ( hs_ls4ex_rdy     ),
         .i_ag_adr                ( agls_adr         ),

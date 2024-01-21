@@ -5,7 +5,7 @@ module cirno9_cpu_top(
     input rst_n,
     input clk
 );
-    wire        hs_ram4ls_rdy = 1;
+    wire        hs_ls4ram_val;
     wire        sram_ren;
     wire [ 3:0] sram_wen;
     wire [31:0] sram_rdat;
@@ -14,7 +14,7 @@ module cirno9_cpu_top(
     cirno9_core  u_cirno9_core (
         .rst_n                   ( rst_n         ),
         .clk                     ( clk           ),
-        .i_hs_ram4ls_rdy         ( hs_ram4ls_rdy ),
+        .o_hs_ls4sram_val        ( hs_ls4ram_val ),
         .o_sram_ren              ( sram_ren      ),
         .o_sram_wen              ( sram_wen      ),
         .i_sram_rdat             ( sram_rdat     ),
@@ -23,11 +23,11 @@ module cirno9_cpu_top(
     );
     
     sram32  u_sram32 (
-        .clk                     ( clk       ),
-        .en                      ( 1'b1         ),
-        .we                      ( sram_wen  ),
-        .adr                     ( adr       ),
-        .din                     ( wdat      ),
-        .dout                    ( sram_rdat )
+        .clk                     ( clk           ),
+        .en                      ( hs_ls4ram_val ),
+        .we                      ( sram_wen      ),
+        .adr                     ( adr           ),
+        .din                     ( wdat          ),
+        .dout                    ( sram_rdat     )
 );
 endmodule

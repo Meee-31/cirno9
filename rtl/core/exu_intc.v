@@ -6,7 +6,7 @@ module exu_intc(
     output [31:0] o_mcause
 );
     assign hs_in4ex_rdy = 1'b1;
-    assign o_int_ena = (| i_ecabr) | i_ilg;
+    assign o_int_ena = ((| i_ecabr) | i_ilg);
     assign o_mcause[31] = (| i_ecabr) ? 1'b0
                         :               1'b1;
     assign o_mcause[30:0] = i_ecabr[1] ? 31'hb

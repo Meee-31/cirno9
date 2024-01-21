@@ -1,4 +1,5 @@
-`include "./core/cirno9_define.v"
+//`include "./core/cirno9_define.v"
+`include "cirno9_define.v"
 
 module exu(
     input  clk,
@@ -213,7 +214,7 @@ module exu(
     wire        hs_in4ex_rdy;
     wire [31:0] mcause;
     exu_intc  u_exu_intc (
-        .hs_in4ex_rdy            (   ),
+        .hs_in4ex_rdy            (  ),
         .i_ecabr                 ( i_ecabr        ),
         .i_ilg                   ( ilg            ),
         .o_int_ena               ( int_ena        ),

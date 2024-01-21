@@ -1,9 +1,10 @@
-VERILOG_FILE = rv32ui-p-add.verilog
+VERILOG_FILE = rv32ui-p-lh.verilog
 
 ini:
 	mkdir -p ./simdir
 	cp -r ../rtl/* ./simdir
 	cp ../tb/* ./simdir
+	cp ../rtl/core/cirno9_define.v ./simdir
 
 isasim:
 	cp ../riscv-tests/isa/gen/$(VERILOG_FILE) ./simdir/a.verilog
