@@ -1,4 +1,4 @@
-VERILOG_FILE = rv32ui-p-lh.verilog
+VERILOG_FILE = rv32ui-p-sw.verilog
 
 ini:
 	mkdir -p ./simdir

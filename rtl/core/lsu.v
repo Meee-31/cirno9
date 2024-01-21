@@ -48,20 +48,20 @@ module lsu(
                           & ~sel_sram;
 
     assign hs_ls4axis_rdy = out_rdy & hs_axis4ls_val_r;
-    assign hs_ls4rd_rdy   = out_rdy & (~hs_axis4ls_val) & hs_rd4ls_val_r;
-    assign hs_ls4ag_rdy   = out_rdy & (~hs_axis4ls_val) & (~hs_rd4ls_val) & hs_ag4ls_val_r;
+    assign hs_ls4ag_rdy   = out_rdy & (~hs_axis4ls_val_r) & hs_ag4ls_val_r;
+    assign hs_ls4rd_rdy   = out_rdy & (~hs_axis4ls_val_r) & (~hs_ag4ls_val_r) & hs_rd4ls_val_r;
 
     wire [31:0] ls_adr  = hs_axis4ls_val ? i_axis_adr
-                        : hs_rd4ls_val   ? i_pc
-                        :                  i_ag_adr;
-    assign o_wdat = hs_ls4ag_rdy ? i_ag_wdat
-                  : hs_ls4rd_rdy ? 32'b0
+                        : hs_ag4ls_val   ? i_ag_adr
+                        :                  i_pc;
+    assign o_wdat = hs_ls4rd_rdy ? 32'b0
+                  : hs_ls4ag_rdy ? i_ag_wdat
                   :                i_axis_wdat;
-    wire [ 3:0] ls_wen  = hs_ls4ag_rdy ? i_ag_wen
-                        : hs_ls4rd_rdy ? 4'b0
+    wire [ 3:0] ls_wen  = hs_ls4rd_rdy ? 4'b0
+                        : hs_ls4ag_rdy ? i_ag_wen
                         :                i_axis_wen;
-    wire        ls_ren  = hs_ls4ag_rdy ? i_ag_ren
-                        : hs_ls4rd_rdy ? 1'b1
+    wire        ls_ren  = hs_ls4rd_rdy ? 1'b1
+                        : hs_ls4ag_rdy ? i_ag_ren
                         :                i_axis_ren;
 
     assign o_adr = {32{out_rdy}} & ls_adr;
