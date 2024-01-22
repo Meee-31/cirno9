@@ -34,7 +34,7 @@ module ifu(
     dffl #(32) pcnx (hs_ls4rd_rdy, pc_nx_nx, pc_nx_r, clk);
 
     wire [31:0] pc_add1 = i_setpc ? i_pc
-                        :          o_pc_r ;
+                        :           o_pc_r ;
     wire [31:0] pc_add2 = i_setpc      ? i_pcadd
                         : hs_ls4rd_rdy ? 32'd4
                         :                32'b0;
