@@ -21,7 +21,7 @@ module ifu(
     assign      val = hs_ls4rd_rdy | (~rdyl);
     wire [31:0] in_l;
     assign      o_in = rdyl ? i_in_r : in_l;
-    assign      hs_rd4ls_val = rdy;
+    assign      hs_rd4ls_val = 1'b1;
 
     dffr  #(1, 1'b1)          ready(rdy ,   rdyl , clk , rst_n);
     dffl  #(32)               inl  (hs_ls4rd_rdy, i_in_r, in_l, clk);

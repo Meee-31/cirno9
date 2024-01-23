@@ -4,14 +4,12 @@ module lsu(
     input         rst_n,
 
     output        hs_ls4sram_val,
-    output        o_sram_ren,
     output [ 3:0] o_sram_wen,
     input  [31:0] i_sram_rdat,
 
     output        hs_ls4axim_val,
     input         hs_axim4ls_rdy,
     output [ 3:0] o_axim_wen,
-    output        o_axim_ren,
     input  [31:0] i_axim_rdat,
     
     output [31:0] o_adr,
@@ -54,19 +52,18 @@ module lsu(
     wire [31:0] ls_adr  = hs_axis4ls_val ? i_axis_adr
                         : hs_ag4ls_val   ? i_ag_adr
                         :                  i_pc;
-    assign o_wdat = hs_ls4rd_rdy ? 32'b0
-                  : hs_ls4ag_rdy ? i_ag_wdat
-                  :                i_axis_wdat;
-    wire [ 3:0] ls_wen  = hs_ls4rd_rdy ? 4'b0
-                        : hs_ls4ag_rdy ? i_ag_wen
-                        :                i_axis_wen;
-    wire        ls_ren  = hs_ls4rd_rdy ? 1'b1
-                        : hs_ls4ag_rdy ? i_ag_ren
-                        :                i_axis_ren;
+
+    assign o_wdat = hs_axis4ls_val ? i_axis_wdat
+                  : hs_ag4ls_val   ? i_ag_wdat
+                  :                  32'b0;
+
+    wire [ 3:0] ls_wen  = hs_axis4ls_val ? i_axis_wen
+                        : hs_ag4ls_val   ? i_ag_wen
+                        :                  4'b0;
 
     assign o_adr = {32{out_rdy}} & ls_adr;
-    assign {o_sram_wen,o_sram_ren} = {5{ sel_sram}} & {ls_wen, ls_ren};
-    assign {o_axim_wen,o_axim_ren} = {5{~sel_sram}} & {ls_wen, ls_ren};
+    assign o_sram_wen = {4{ sel_sram}} & ls_wen;
+    assign o_axim_wen = {4{~sel_sram}} & ls_wen;
     wire   sel_sram_r;
     assign o_rdat = sel_sram_r ? i_sram_rdat : i_axim_rdat;
     dffl #(1)       radtsd (1'b1, sel_sram, sel_sram_r, clk);

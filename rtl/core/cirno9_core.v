@@ -10,7 +10,45 @@ module cirno9_core(
     output [ 3:0] o_sram_wen,
     input  [31:0] i_sram_rdat,
     output [31:0] o_adr,
-    output [31:0] o_wdat
+    output [31:0] o_wdat,
+
+    output [31:0]   m_axi_awaddr, 
+    output [7:0]              m_axi_awlen,  
+    output [2:0]              m_axi_awsize, 
+    output [1:0]              m_axi_awburst,
+    output                    m_axi_awlock, 
+    output [3:0]              m_axi_awcache,
+    output [2:0]              m_axi_awprot, 
+    output [3:0]              m_axi_awqos,  
+    output                    m_axi_awvalid,
+    input                     m_axi_awready,
+    /*write*/
+    output [31:0]   m_axi_wdata,  
+    output [3:0]    m_axi_wstrb,  
+    output                    m_axi_wlast,  
+    output                    m_axi_wvalid, 
+    input                     m_axi_wready, 
+    /*write response*/ 
+    input  [1:0]              m_axi_bresp,  
+    input                     m_axi_bvalid, 
+    output                    m_axi_bready, 
+    /*address read*/ 
+    output [31:0]   m_axi_araddr, 
+    output [7:0]              m_axi_arlen,  
+    output [2:0]              m_axi_arsize, 
+    output [1:0]              m_axi_arburst,
+    output                    m_axi_arlock, 
+    output [3:0]              m_axi_arcache,
+    output [2:0]              m_axi_arprot, 
+    output [3:0]              m_axi_arqos,  
+    output                    m_axi_arvalid,
+    input                     m_axi_arready,
+    /*read*/ 
+    input  [31:0]   m_axi_rdata,  
+    input  [1:0]              m_axi_rresp,  
+    input                     m_axi_rlast,  
+    input                     m_axi_rvalid, 
+    output                    m_axi_rready
 );
     wire        hs_ex4rd_rdy;
     wire        hs_rd4ex_val;
@@ -123,29 +161,23 @@ module cirno9_core(
     wire        hs_ls4axim_val;
     wire        hs_axim4ls_rdy;
     wire [ 3:0] axim_wen;
-    wire        axim_ren;
-    wire [31:0] o_axim_adr;
-    wire [31:0] o_axim_wdat;
-    wire [31:0] i_axim_rdat;
+    wire [31:0] axim_rdat;
     wire        hs_axis4ls_val;
     wire        hs_ls4axis_rdy;
     wire [31:0] axis_adr;
     wire [31:0] axis_wdat;
     wire [ 3:0] axis_wen;
-    wire        axis_ren;
     wire [31:0] rdat;
     lsu  u_lsu (
         .clk                     ( clk              ),
         .rst_n                   ( rst_n            ),
         .hs_ls4sram_val          ( o_hs_ls4sram_val ),
-        .o_sram_ren              ( o_sram_ren       ),
         .o_sram_wen              ( o_sram_wen       ),
         .i_sram_rdat             ( i_sram_rdat      ),
-        .hs_ls4axim_val          (   ),
-        .hs_axim4ls_rdy          ( 1'b0  ),
-        .o_axim_wen              (   ),
-        .o_axim_ren              (   ),
-        .i_axim_rdat             ( 32'b0  ),
+        .hs_ls4axim_val          ( hs_ls4axim_val   ),
+        .hs_axim4ls_rdy          ( hs_axim4ls_rdy   ),
+        .o_axim_wen              ( axim_wen         ),
+        .i_axim_rdat             ( axim_rdat        ),
         .o_adr                   ( o_adr            ),
         .o_wdat                  ( o_wdat           ),
         .hs_rd4ls_val            ( hs_rd4ls_val     ),
@@ -165,4 +197,52 @@ module cirno9_core(
         .i_axis_ren              ( 1'b0  ),
         .o_rdat                  ( rdat             )
     );
+
+axi4m #(
+    .AXI_ADDR_W ( 32 ),
+    .AXI_DATA_W ( 32 ))
+ u_axi4m (
+    .clk                     ( clk             ),
+    .rst_n                   ( rst_n           ),
+    .m_axi_awready           ( m_axi_awready   ),
+    .m_axi_wready            ( m_axi_wready    ),
+    .m_axi_bresp             ( m_axi_bresp     ),
+    .m_axi_bvalid            ( m_axi_bvalid    ),
+    .m_axi_arready           ( m_axi_arready   ),
+    .m_axi_rdata             ( m_axi_rdata     ),
+    .m_axi_rresp             ( m_axi_rresp     ),
+    .m_axi_rlast             ( m_axi_rlast     ),
+    .m_axi_rvalid            ( m_axi_rvalid    ),
+
+    .m_axi_awaddr            ( m_axi_awaddr    ),
+    .m_axi_awlen             ( m_axi_awlen     ),
+    .m_axi_awsize            ( m_axi_awsize    ),
+    .m_axi_awburst           ( m_axi_awburst   ),
+    .m_axi_awlock            ( m_axi_awlock    ),
+    .m_axi_awcache           ( m_axi_awcache   ),
+    .m_axi_awprot            ( m_axi_awprot    ),
+    .m_axi_awqos             ( m_axi_awqos     ),
+    .m_axi_awvalid           ( m_axi_awvalid   ),
+    .m_axi_wdata             ( m_axi_wdata     ),
+    .m_axi_wstrb             ( m_axi_wstrb     ),
+    .m_axi_wlast             ( m_axi_wlast     ),
+    .m_axi_wvalid            ( m_axi_wvalid    ),
+    .m_axi_bready            ( m_axi_bready    ),
+    .m_axi_araddr            ( m_axi_araddr    ),
+    .m_axi_arlen             ( m_axi_arlen     ),
+    .m_axi_arsize            ( m_axi_arsize    ),
+    .m_axi_arburst           ( m_axi_arburst   ),
+    .m_axi_arlock            ( m_axi_arlock    ),
+    .m_axi_arcache           ( m_axi_arcache   ),
+    .m_axi_arprot            ( m_axi_arprot    ),
+    .m_axi_arqos             ( m_axi_arqos     ),
+    .m_axi_arvalid           ( m_axi_arvalid   ),
+    .m_axi_rready            ( m_axi_rready    ),
+    .val                     ( hs_ls4axim_val  ),
+    .rdy                     ( hs_axim4ls_rdy  ),
+    .wen                     ( axim_wen        ),
+    .adr                     ( o_adr           ),
+    .wdat                    ( o_wdat          ),
+    .rdat                    ( axim_rdat       )
+);
 endmodule

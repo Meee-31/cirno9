@@ -103,6 +103,6 @@ module axi4m #(
     
     assign m_axi_rready  = state_r == READ;
 
-    assign rdy = (m_axi_rready | m_axi_bready) & state_en;
+    assign rdy = r_hs | b_hs;
     assign rdat = m_axi_rdata;
 endmodule
