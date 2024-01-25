@@ -61,7 +61,7 @@ module lsu(
                         : hs_ag4ls_val   ? i_ag_wen
                         :                  4'b0;
 
-    assign o_adr = {32{out_rdy}} & ls_adr;
+    assign o_adr = ls_adr;
     assign o_sram_wen = {4{ sel_sram}} & ls_wen;
     assign o_axim_wen = {4{~sel_sram}} & ls_wen;
     wire   sel_sram_r;
