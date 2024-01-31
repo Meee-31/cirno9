@@ -6,49 +6,18 @@ module cirno9_core(
     input         clk,
 
     output        o_hs_ls4sram_val,
-    output        o_sram_ren,
     output [ 3:0] o_sram_wen,
     input  [31:0] i_sram_rdat,
-    output [31:0] o_adr,
-    output [31:0] o_wdat,
 
-    output [31:0]   m_axi_awaddr, 
-    output [7:0]              m_axi_awlen,  
-    output [2:0]              m_axi_awsize, 
-    output [1:0]              m_axi_awburst,
-    output                    m_axi_awlock, 
-    output [3:0]              m_axi_awcache,
-    output [2:0]              m_axi_awprot, 
-    output [3:0]              m_axi_awqos,  
-    output                    m_axi_awvalid,
-    input                     m_axi_awready,
-    /*write*/
-    output [31:0]   m_axi_wdata,  
-    output [3:0]    m_axi_wstrb,  
-    output                    m_axi_wlast,  
-    output                    m_axi_wvalid, 
-    input                     m_axi_wready, 
-    /*write response*/ 
-    input  [1:0]              m_axi_bresp,  
-    input                     m_axi_bvalid, 
-    output                    m_axi_bready, 
-    /*address read*/ 
-    output [31:0]   m_axi_araddr, 
-    output [7:0]              m_axi_arlen,  
-    output [2:0]              m_axi_arsize, 
-    output [1:0]              m_axi_arburst,
-    output                    m_axi_arlock, 
-    output [3:0]              m_axi_arcache,
-    output [2:0]              m_axi_arprot, 
-    output [3:0]              m_axi_arqos,  
-    output                    m_axi_arvalid,
-    input                     m_axi_arready,
-    /*read*/ 
-    input  [31:0]   m_axi_rdata,  
-    input  [1:0]              m_axi_rresp,  
-    input                     m_axi_rlast,  
-    input                     m_axi_rvalid, 
-    output                    m_axi_rready
+    output        o_hs_ls4iob_val,
+    input         i_hs_iob4ls_rdy,
+    output [ 3:0] o_iob_wen,
+    input  [31:0] i_iob_rdat,
+
+    output [31:0] o_adr,
+    output [31:0] o_wdat
+
+
 );
     wire        hs_ex4rd_rdy;
     wire        hs_rd4ex_val;
@@ -174,10 +143,10 @@ module cirno9_core(
         .hs_ls4sram_val          ( o_hs_ls4sram_val ),
         .o_sram_wen              ( o_sram_wen       ),
         .i_sram_rdat             ( i_sram_rdat      ),
-        .hs_ls4axim_val          ( hs_ls4axim_val   ),
-        .hs_axim4ls_rdy          ( hs_axim4ls_rdy   ),
-        .o_axim_wen              ( axim_wen         ),
-        .i_axim_rdat             ( axim_rdat        ),
+        .hs_ls4iob_val           ( o_hs_ls4iob_val  ),
+        .hs_iob4ls_rdy           ( i_hs_iob4ls_rdy  ),
+        .o_iob_wen               ( o_iob_wen        ),
+        .i_iob_rdat              ( i_iob_rdat       ),
         .o_adr                   ( o_adr            ),
         .o_wdat                  ( o_wdat           ),
         .hs_rd4ls_val            ( hs_rd4ls_val     ),
@@ -197,7 +166,8 @@ module cirno9_core(
         .i_axis_ren              ( 1'b0  ),
         .o_rdat                  ( rdat             )
     );
-
+endmodule
+/*
 axi4m #(
     .AXI_ADDR_W ( 32 ),
     .AXI_DATA_W ( 32 ))
@@ -244,5 +214,4 @@ axi4m #(
     .adr                     ( o_adr           ),
     .wdat                    ( o_wdat          ),
     .rdat                    ( axim_rdat       )
-);
-endmodule
+);*/

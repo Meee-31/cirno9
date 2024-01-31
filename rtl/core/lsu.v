@@ -7,10 +7,10 @@ module lsu(
     output [ 3:0] o_sram_wen,
     input  [31:0] i_sram_rdat,
 
-    output        hs_ls4axim_val,
-    input         hs_axim4ls_rdy,
-    output [ 3:0] o_axim_wen,
-    input  [31:0] i_axim_rdat,
+    output        hs_ls4iob_val,
+    input         hs_iob4ls_rdy,
+    output [ 3:0] o_iob_wen,
+    input  [31:0] i_iob_rdat,
     
     output [31:0] o_adr,
     output [31:0] o_wdat,
@@ -37,12 +37,12 @@ module lsu(
 );
     wire hs_ram4ls_rdy;
     wire sel_sram = (ls_adr[31:16] == 16'h8000);
-    wire out_rdy = sel_sram_r ? hs_ram4ls_rdy : hs_axim4ls_rdy;
+    wire out_rdy = sel_sram_r ? hs_ram4ls_rdy : hs_iob4ls_rdy;
     wire hs_axis4ls_val_r, hs_rd4ls_val_r, hs_ag4ls_val_r;
     
     assign hs_ls4sram_val = (hs_rd4ls_val | hs_ag4ls_val | hs_axis4ls_val)
                           & sel_sram;
-    assign hs_ls4axim_val = (hs_rd4ls_val | hs_ag4ls_val | hs_axis4ls_val)
+    assign hs_ls4iob_val = (hs_rd4ls_val | hs_ag4ls_val | hs_axis4ls_val)
                           & ~sel_sram;
 
     assign hs_ls4axis_rdy = out_rdy & hs_axis4ls_val_r;
@@ -63,9 +63,9 @@ module lsu(
 
     assign o_adr = ls_adr;
     assign o_sram_wen = {4{ sel_sram}} & ls_wen;
-    assign o_axim_wen = {4{~sel_sram}} & ls_wen;
+    assign o_iob_wen = {4{~sel_sram}} & ls_wen;
     wire   sel_sram_r;
-    assign o_rdat = sel_sram_r ? i_sram_rdat : i_axim_rdat;
+    assign o_rdat = sel_sram_r ? i_sram_rdat : i_iob_rdat;
     dffl #(1)       radtsd (1'b1, sel_sram, sel_sram_r, clk);
     dffr #(1, 1'b0) ramrdyd(hs_ls4sram_val, hs_ram4ls_rdy, clk, rst_n);
     dffr #(1, 1'b0) axid (hs_axis4ls_val, hs_axis4ls_val_r, clk, rst_n);

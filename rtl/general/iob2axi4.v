@@ -1,8 +1,7 @@
-module axi4m #(
+module iob2axi4 #(
     parameter AXI_ADDR_W = 32,
     parameter AXI_DATA_W = 32
-)
-(
+)(
     input                     clk,
     input                     rst_n,
 
@@ -44,7 +43,7 @@ module axi4m #(
     input                     m_axi_rvalid,  /*Read channel valid*/ 
     output                    m_axi_rready,  /*Read channel ready*/
 
-    /*native*/
+    /*iob*/
     input                     val,
     output                    rdy,
     input  [31:0]             adr,
