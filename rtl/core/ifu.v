@@ -15,17 +15,18 @@ module ifu(
 
     input         i_setpc,
     input  [31:0] i_pc,
-    input  [31:0] i_pcadd
+    input  [31:0] i_pcadd,
+    input         i_jtag_halt_req
 );
     wire        rdyl;
-    assign      val = hs_ls4rd_rdy | (~rdyl);
+    assign      val = (hs_ls4rd_rdy | (~rdyl)) & ~(i_jtag_halt_req);
     wire [31:0] in_l;
     assign      o_in = rdyl ? i_in_r : in_l;
     assign      hs_rd4ls_val = 1'b1;
 
     dffr  #(1, 1'b1)          ready(rdy ,   rdyl , clk , rst_n);
     dffl  #(32)               inl  (hs_ls4rd_rdy, i_in_r, in_l, clk);
-    dfflr #(32, 32'h80000000) pc   (rdy, o_pc_nx, o_pc_r, clk , rst_n);
+    dfflr #(32, 32'h00000000) pc   ((rdy | i_jtag_halt_req), o_pc_nx, o_pc_r, clk , rst_n);
 
     assign o_pc_nx = rdyl ? pc_nx_nx : pc_nx_r;
 

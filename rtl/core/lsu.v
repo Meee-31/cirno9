@@ -36,7 +36,7 @@ module lsu(
     output [31:0] o_rdat
 );
     wire hs_ram4ls_rdy;
-    wire sel_sram = (ls_adr[31:16] == 16'h8000);
+    wire sel_sram = (ls_adr[31:16] == 16'h0000);
     wire out_rdy = sel_sram_r ? hs_ram4ls_rdy : hs_iob4ls_rdy;
     wire hs_axis4ls_val_r, hs_rd4ls_val_r, hs_ag4ls_val_r;
     

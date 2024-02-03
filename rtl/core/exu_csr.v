@@ -187,8 +187,8 @@ module exu_csr(
     assign mie_r[2:0] = 3'b0;
     wire [31:0] cmie = mie_r;
     
-    wire sel_mcyclel   = (csr_idx == 12'hB00);
-    wire sel_mcycleh   = (csr_idx == 12'hB80);
+    wire sel_mcyclel   = (csr_idx == 12'hC00);
+    wire sel_mcycleh   = (csr_idx == 12'hC80);
     wire sel_minstretl = (csr_idx == 12'hB02);
     wire sel_minstreth = (csr_idx == 12'hB82);
     wire rd_mcyclel    = csr_ren & sel_mcyclel  ;
@@ -203,14 +203,14 @@ module exu_csr(
     wire [31:0] mcycleh_r  ;
     wire [31:0] minstretl_r;
     wire [31:0] minstreth_r;
-    wire mcycleh_gon = (mcyclel_r == 32'b1);
+    wire mcycleh_gon = (mcyclel_r == 32'hFFFF_FFFF);
     wire minstretl_gon = in_retr;
     wire minstreth_gon = in_retr & (minstretl_r == 32'b1);
     wire [31:0] mcyclel_nxt   = wr_mcyclel ? csr_wdat
                               :              (mcyclel_r + 1'b1);
     wire [31:0] mcycleh_nxt   = wr_mcycleh  ? csr_wdat
                               : mcycleh_gon ? (mcycleh_r + 1'b1)
-                              :               minstreth_r;
+                              :               mcycleh_r;
     wire [31:0] minstretl_nxt = wr_minstretl  ? csr_wdat
                               : minstretl_gon ? (minstretl_r + 1'b1)
                               :                 minstretl_r;

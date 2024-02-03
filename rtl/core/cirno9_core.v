@@ -13,11 +13,18 @@ module cirno9_core(
     input         i_hs_iob4ls_rdy,
     output [ 3:0] o_iob_wen,
     input  [31:0] i_iob_rdat,
-
     output [31:0] o_adr,
-    output [31:0] o_wdat
+    output [31:0] o_wdat,
+ 
+    input         hs_iobs4ls_val,
+    output        hs_ls4iobs_rdy,
+    input  [31:0] i_iob_s_adr, 
+    input  [31:0] i_iob_s_wdat,
+    input  [ 3:0] i_iob_s_wen, 
+    input         i_iob_s_ren,
+    output [31:0] o_iob_s_rdat,
 
-
+    input         i_jtag_halt_req
 );
     wire        hs_ex4rd_rdy;
     wire        hs_rd4ex_val;
@@ -42,7 +49,8 @@ module cirno9_core(
         .o_pc_r                  ( pc_r        ),
         .i_setpc                 ( setpc   ),
         .i_pc                    ( pc      ),
-        .i_pcadd                 ( pcadd   )
+        .i_pcadd                 ( pcadd   ),
+        .i_jtag_halt_req         ( i_jtag_halt_req)
     );
     
     wire [`CIRNO_DEC_OPB_SIZE-1:0]  opb;
@@ -131,12 +139,11 @@ module cirno9_core(
     wire        hs_axim4ls_rdy;
     wire [ 3:0] axim_wen;
     wire [31:0] axim_rdat;
-    wire        hs_axis4ls_val;
-    wire        hs_ls4axis_rdy;
     wire [31:0] axis_adr;
     wire [31:0] axis_wdat;
     wire [ 3:0] axis_wen;
     wire [31:0] rdat;
+    assign o_iob_s_rdat = rdat;
     lsu  u_lsu (
         .clk                     ( clk              ),
         .rst_n                   ( rst_n            ),
@@ -158,12 +165,12 @@ module cirno9_core(
         .i_ag_wdat               ( agls_wdat        ),
         .i_ag_wen                ( agls_wen         ),
         .i_ag_ren                ( agls_ren         ),
-        .hs_axis4ls_val          ( 1'b0  ),
-        .hs_ls4axis_rdy          (   ),
-        .i_axis_adr              ( 32'b0  ),
-        .i_axis_wdat             ( 32'b0  ),
-        .i_axis_wen              ( 4'b0  ),
-        .i_axis_ren              ( 1'b0  ),
+        .hs_axis4ls_val          ( hs_iobs4ls_val   ),
+        .hs_ls4axis_rdy          ( hs_ls4iobs_rdy   ),
+        .i_axis_adr              ( i_iob_s_adr      ),
+        .i_axis_wdat             ( i_iob_s_wdat     ),
+        .i_axis_wen              ( i_iob_s_wen      ),
+        .i_axis_ren              ( i_iob_s_ren      ),
         .o_rdat                  ( rdat             )
     );
 endmodule
