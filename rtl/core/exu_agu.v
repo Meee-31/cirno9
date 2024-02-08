@@ -1,4 +1,5 @@
-`include "./core/cirno9_define.v"
+//`include "./core/cirno9_define.v"
+`include "cirno9_define.v"
 module exu_agu(
     input              clk,
     input              rst_n,
@@ -109,7 +110,7 @@ module exu_agu(
                  | ({32{lslh}} & h_res)
                  | ({32{lslb}} & b_res);
 
-    assign hs_ag4ls_val = hs_ex4ag_val & ~misal;
-    //dffr #(1) val(hs_ag4ls_val_r, hs_ag4ls_val, clk, rst_n);
+    assign hs_ag4ls_val = hs_ex4ag_val & (~misal);
+    //dffr #(1) val(hs_ag4ls_val, hs_ag4ls_val_r, clk, rst_n);
     //dffr #(32)adr(o_ls_adr_r, o_ls_adr, clk, rst_n);
 endmodule

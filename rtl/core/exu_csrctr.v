@@ -1,4 +1,5 @@
-`include "./core/cirno9_define.v"
+//`include "./core/cirno9_define.v"
+`include "cirno9_define.v"
 
 module exu_csrctr(
     input         hs_ex4cs_val,

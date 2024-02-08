@@ -1,4 +1,5 @@
-`include "./core/cirno9_define.v"
+//`include "./core/cirno9_define.v"
+`include "cirno9_define.v"
 
 module exu_alu(
     input              hs_ex4al_val,

@@ -7,6 +7,7 @@ module sram32(
     output [31:0] dout
 );
     reg  [31:0] mem_r [0:16383];
+    wire [13:0] adr_w_r;
     wire [31:0] mem_d;
     wire [13:0] adr_w = adr[15:2];
 
@@ -16,6 +17,6 @@ module sram32(
         if (en & we[2]) mem_r[adr_w][23:16] <= din[23:16];
         if (en & we[3]) mem_r[adr_w][31:24] <= din[31:24];
     end
-
-    assign dout = mem_r[adr_w];
+    dffl #(14) adrd(1'b1, adr_w, adr_w_r, clk);
+    assign dout = mem_r[adr_w_r];
 endmodule

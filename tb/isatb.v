@@ -95,8 +95,8 @@ module isatb();
     end
 
     cirno9_cpu_top cpu0(
-        .rst_n (rst_n),
-        .clk   (clk  )
+        .outside_rst_n (rst_n),
+        .clk           (clk  )
     );
     
     initial

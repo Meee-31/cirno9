@@ -1,6 +1,8 @@
-`include "./core/cirno9_define.v"
+//`include "./core/cirno9_define.v"
+`include "cirno9_define.v"
 
-module decode(   
+module decode(
+    input              i_val,
     input       [31:0] i_in,
     input       [31:0] i_pc,
 
@@ -258,8 +260,8 @@ module decode(
     wire rv32_sxxi_shamt_ilgl = (rv32_slli | rv32_srli | rv32_srai) & 
                                 (~rv32_sxxi_shamt_legl);
 
-    assign o_ilgl = (rv_all0s1s_ilgl     ) |
-                    (rv32_sxxi_shamt_ilgl);
+    assign o_ilgl = ((rv_all0s1s_ilgl     ) |
+                    (rv32_sxxi_shamt_ilgl)) & i_val;
 
     wire rv32_nop = ((rv32_itype | rv32_rtype  | 
                          rv32_itype | rv32_lui   | 
@@ -269,7 +271,7 @@ module decode(
 
     assign o_rd_wen = rd_wen & o_val;
 
-    assign o_val = ~(rv32_nop) & (| o_usele) & (~o_ilgl);
+    assign o_val = ~(rv32_nop) & (| o_usele) & (~o_ilgl) & i_val;
 
-    assign o_ecallbreak = {rv32_ecall, rv32_ebreak};
+    assign o_ecallbreak = {rv32_ecall, rv32_ebreak} & {2{i_val}};
 endmodule
